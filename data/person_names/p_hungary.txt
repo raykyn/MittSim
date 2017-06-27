@@ -1,0 +1,432 @@
+M	Ábel	1
+M	Ádám	4
+M	Adolf	1
+M	Adorján	2
+M	Adrián	1
+F	Adrienn	6
+F	Adrienne	4
+F	Ági	1
+F	Ági Ágnes	1
+F	Ágnes	9
+M	Ágoston	4
+F	Ágota	6
+M	Ákos	5
+M	Aladár	5
+M	Alajos	5
+M	Albert	4
+F	Alexa	1
+F	Alexandra	2
+M	Alfonz	2
+M	Alfréd	2
+F	Aliz	1
+M	Álmos	1
+F	Amália	1
+M	Ambrus	1
+F	Anasztázia	1
+M	Andor	4
+M	András	8
+M	András Andris	1
+F	Andrea	9
+M	Andris	1
+F	Anett	2
+F	Angéla	3
+F	Angyalka	1
+F	Anikó	7
+F	Anita	7
+F	Anna	8
+F	Annamária	6
+M	Antal	7
+F	Antónia	3
+F	Aranka	5
+M	Arisztid	1
+M	Áron	3
+M	Árpád	7
+M	Artúr	3
+M	Attila	9
+M	Aurél	4
+M	Balázs	7
+M	Bálint	6
+M	Bandi	1
+M	Bandi András	1
+F	Barbara	4
+M	Barna	2
+M	Barnabás	5
+F	Beáta	7
+F	Beatrix	6
+M	Béla	8
+F	Bella	1
+M	Bence	3
+M	Benedek	2
+M	Benjámin	1
+F	Bernadett	5
+M	Bernát	1
+F	Berta	1
+M	Bertalan	5
+M	Boldizsár	4
+F	Borbála	6
+M	Botond	2
+F	Brigitta	6
+F	Cecília	4
+F	Cili	2
+M	Csaba	8
+F	Csenge	1
+F	Csilla	7
+F	Dalma	1
+M	Dani	1
+F	Dani Dániel	1
+M	Dániel	3
+M	Dávid	2
+M	Dénes	5
+M	Dezső	6
+M	Dezső	6
+F	Diána	2
+M	Domonkos	1
+M	Donát	2
+F	Dóra	6
+F	Dorina	1
+F	Dorottya	4
+M	Ede	1
+F	Edina	7
+F	Edit	8
+M	Egon	2
+M	Elek	5
+M	Elemér	5
+F	Eleonóra	4
+F	Elvíra	5
+F	Elza	1
+F	Emese	3
+M	Emil	4
+F	Emília	4
+F	Emma	5
+F	Emöke	6
+F	Emöke	6
+M	Endre	7
+F	Enikő	5
+F	Enikő	5
+M	Erik	2
+F	Erika	8
+M	Ernő	7
+M	Ernő	7
+M	Ervin	5
+F	Erzsébet	9
+F	Erzsi	1
+F	Erzsi Erzsébet	1
+F	Eszter	8
+F	Eszti	1
+F	Eszti Eszter	1
+F	Etel	2
+F	Etelka	5
+F	Éva	9
+F	Fanni	1
+F	Ferencné	7
+M	Feri	1
+M	Feri Ferenc	1
+F	Flóra	2
+F	Franci	1
+F	Franci Franciska	1
+F	Franciska	2
+M	Frigyes	4
+F	Fruzsina	6
+M	Fülöp	1
+M	Fülöp	1
+M	Gabi	3
+F	Gabi Gábor	1
+F	Gabi Gabriella	1
+M	Gábor	9
+F	Gáborné	5
+F	Gabriella	8
+M	Gáspár	6
+M	Gazsi	1
+M	Gazsi Gáspár	1
+M	Gellért	4
+F	Genovéva	2
+F	Georgina	2
+M	Gergely	5
+M	Gergő	1
+M	Gergő	1
+M	Géza	7
+F	Gizella	6
+F	Gizi	1
+F	Gizi Gizella	1
+F	Glória	3
+M	Gusztáv	5
+F	Gyöngyi	7
+F	Gyöngyvér	2
+M	György	8
+M	György Gyuszi	1
+F	Györgyi	6
+M	Győző	5
+F	Gyöngyi	7
+F	Gyöngyvér	2
+M	György	8
+M	György Gyuszi	1
+F	Györgyi	6
+M	Győző	5
+M	Gyula	8
+M	Gyuri	1
+M	Gyuri György	1
+M	Gyuri György	1
+M	Gyuszi	1
+F	Hajnal	2
+F	Hajnalka	6
+F	Hedvig	2
+F	Helga	5
+F	Henriett	5
+F	Henrietta	3
+F	Henriette	2
+M	Henrik	2
+F	Hilda	3
+M	Hubertusz	1
+F	Ibolya	8
+F	Ida	2
+M	Ignác	3
+F	Ildi	1
+F	Ildi Ildikó	1
+F	Ildikó	9
+F	Ili	1
+M	Ili Ildikó	1
+M	Illés	3
+F	Ilona	9
+F	Ilona Ilonka	1
+F	Ilonka	1
+M	Imre	9
+F	Imréné	7
+F	Irén	7
+F	Irma	4
+F	Istvánné	8
+M	Iván	5
+F	Izabella	2
+M	Jácint	1
+M	Jakab	1
+M	Jancsi	1
+F	Jani János	1
+M	Janika	1
+F	Janka	3
+M	Jankó	1
+M	Jankó János	1
+M	János Jancsi	1
+M	János Janika	1
+F	Jánosné	7
+F	Jelka	2
+M	Jenci	1
+M	Jenő	7
+M	Jenő	7
+M	Jenő Jenci	1
+M	Jenő Jenci	1
+F	Jolán	6
+M	Jóska	1
+M	Jóska József	1
+F	Jozefa	1
+F	Józsefné	8
+M	Józsi	1
+M	Józsi József	1
+F	Judit	9
+F	Juli	1
+F	Júlia	5
+F	Julianna	5
+M	Juli Júlia	1
+F	Julika	2
+F	Juliska	1
+F	Jusztina	2
+F	Jutka	1
+M	Kálmán	7
+F	Kamilla	2
+M	Karcsi	1
+M	Karcsi Károly	1
+F	Karola	1
+F	Karolina	1
+M	Károly	9
+F	Kata	8
+F	Kata Katalin	4
+F	Kati	4
+F	Kati Katalin	1
+M	Kázmér	2
+F	Kinga	5
+F	Kitti	1
+F	Klára	8
+F	Klára Klári	1
+F	Klári	1
+F	Klaudia	1
+F	Klotild	1
+M	Konstantin	2
+M	Kornél	4
+F	Kornélia	4
+M	Kristóf	2
+M	Krisztián	6
+F	Krisztina	9
+M	Laci	2
+F	Laci László	1
+M	Ladislaus	2
+M	Lajos	9
+F	Lajosné	7
+F	Lászlóné	8
+F	Laura	1
+M	Lázár	1
+M	Lehel	1
+F	Lenke	3
+M	Levente	2
+F	Lídia	2
+F	Lili	1
+F	Lilian	1
+F	Lilla	4
+F	Lívia	6
+M	Lóránd	1
+M	Lóránt	1
+F	Luca	1
+F	Lujza	4
+M	Lukács	2
+F	Magda	1
+F	Magdolna	8
+F	Malika	2
+F	Margaréta	3
+F	Margaretta	1
+F	Margit	8
+F	Mari	6
+F	Mária Marika	1
+F	Mariann	5
+F	Marianna	7
+F	Marietta	3
+F	Marika	1
+F	Mari Mária	2
+F	Mariska	1
+M	Márk	1
+F	Márta	8
+M	Márton	5
+M	Mártón	4
+F	Matild	1
+M	Mátyás	4
+F	Melinda	6
+M	Menyhért	1
+F	Mercédesz	4
+M	Mihály	6
+M	Miklós	9
+M	Misi	1
+M	Misi Mihály	1
+M	Miska	1
+M	Miska Mihály	1
+M	Miska Miklós	1
+F	Mónika	8
+M	Nándor	5
+F	Natália	2
+F	Nikolett	1
+F	Nikoletta	4
+F	Noémi	4
+F	Nóra	6
+M	Norbert	6
+M	Ödön	5
+M	Ödön	5
+F	Olga	4
+M	Orbán	1
+F	Orsi	1
+M	Orsi Orsolya	1
+F	Orsolya	5
+M	Oszkár	4
+F	Otília	1
+F	Ottília	1
+M	Ottó	5
+M	Pál	7
+F	Panna	1
+F	Patricia	3
+F	Patrícia	1
+M	Péter	9
+M	Peti	1
+F	Peti Péter	1
+F	Petra	2
+F	Piroska	6
+M	Pista	1
+M	Pista István	1
+M	Pisti	1
+M	Pisti István	1
+F	Ráhel	1
+F	Rebeka	1
+F	Regina	1
+F	Réka	5
+F	Renáta	5
+M	Rezsö	6
+M	Rezsö	6
+M	Richárd	3
+F	Rita	7
+M	Róbert	8
+M	Robi	1
+F	Robi Róbert	1
+M	Roland	6
+F	Róza	2
+F	Rozália	6
+F	Rozalinda	1
+F	Rózsa	6
+F	Rózsi	1
+F	Rózsika	1
+F	Rózsi Rozália	1
+M	Rudolf	4
+M	Sámuel	1
+M	Sándor	9
+F	Sándorné	7
+M	Sanyi	1
+?	Sanyi Sándor	1
+F	Sára	4
+M	Sára Sári	1
+F	Sári	1
+F	Sarolta	5
+M	Sebestyén	2
+F	Stefánia	1
+F	Szabina	2
+M	Szabolcs	6
+F	Szandra	1
+F	Szeréna	1
+M	Szilárd	6
+M	Szilveszter	4
+F	Szilvia	7
+F	Szonja	1
+F	Sztevana	1
+F	Szvetlana	1
+M	Tamás	9
+F	Teodóra	1
+F	Teréz	6
+F	Terézia	6
+M	Tibor	9
+F	Tiborné	7
+M	Tihamér	1
+F	Tímea	7
+F	Timi	1
+F	Timi Tímea	1
+M	Tivadar	5
+M	Tomi	1
+F	Tomi Tamás	1
+F	Tünde	7
+F	Tünde	7
+F	Valéria	6
+M	Vencel	1
+M	Vendel	2
+F	Vera	2
+F	Veronika	7
+M	Viktor	4
+F	Viktória	6
+M	Vili	1
+M	Vili Vilmos	1
+F	Vilma	1
+M	Vilmos	5
+M	Vince	3
+F	Viola	2
+F	Violetta	1
+F	Virág	2
+M	Vladimir	2
+F	Zília	1
+F	Zita	6
+M	Zoárd	1
+M	Zoli	1
+M	Zoli Zoltán	1
+M	Zoltán	9
+F	Zoltánné	6
+F	Zsanett	4
+M	Zsiga	1
+M	Zsiga Zsigmond	1
+M	Zsigmond	4
+F	Zsófia	5
+F	Zsóka	1
+M	Zsolt	9
+M	Zsolti	1
+M	Zsolt Zsolti	1
+F	Zsuzsa	7
+F	Zsuzsanna	9
+F	Zsuzsa Zsuzsi	1
+F	Zsuzsi	1

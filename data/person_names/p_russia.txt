@@ -1,0 +1,532 @@
+F	Adilia	1
+F	Aelita	1
+M	Alan	4
+M	Albert	3
+F	Albina	5
+F	Aleksandra	8
+M	Aleksei	9
+M	Aleksei Aljoscha	3
+M	Aleksej	9
+M	Aleksey	9
+F	Alena	6
+F	Alevtina	5
+F	Alexandra	8
+M	Alexei Aljoscha	3
+M	Alexej Aljoscha	3
+M	Alexey Aljoscha	3
+F	Alfia	1
+F	Alija	1
+F	Alina	5
+F	Aliona	3
+M	Aliosha	3
+F	Alisa	5
+F	Alissa	4
+F	Aliya	1
+F	Aljona	3
+M	Aljoscha	3
+F	Alla	7
+F	Alyona	3
+F	Amalia	1
+F	Amalija	1
+F	Amanta	1
+F	Anastasia	8
+F	Anastasija	6
+F	Anastasiya	6
+F	Anastassia	4
+F	Anastassija	4
+F	Anastassiya	4
+F	Anastasya	4
+M	Anatoli	8
+F	Anatolia	1
+M	Anatolij	5
+F	Anatolija	1
+M	Anatoliy	6
+F	Anatoliya	1
+M	Anatoly	8
+F	Angela	4
+F	Angelica	4
+F	Angelika	5
+F	Angelina	4
+F	Anna	9
+M	Anton	8
+F	Antonina	5
+F	Anzhela	2
+F	Anzhelika	5
+F	Arina	4
+M	Arkadi	5
+M	Arkadij	3
+M	Arkadiy	4
+M	Arkady	4
+M	Arseni	3
+M	Arseny	3
+M	Artem	6
+M	Artiom	3
+M	Artur	6
+M	Artyom	3
+F	Asia	1
+F	Assia	1
+F	Avdotja	3
+F	Avdotya	3
+F	Avrora	1
+M	Boris	8
+M	Boris Borja	1
+M	Borja	1
+M	Cyril	4
+M	Daniil	4
+M	Danila	4
+F	Daria	6
+F	Darija	2
+F	Dariya	2
+F	Darja	5
+F	Darya	6
+M	Denis	7
+F	Diana	5
+F	Dina	3
+F	Dinara	5
+M	Dmitrij	7
+M	Dmitriy	8
+F	Ecaterina	8
+M	Eduard	5
+M	Egor	5
+F	Ekaterina	9
+F	Eleonora	4
+F	Elina	3
+F	Elizaveta	6
+F	Ella	3
+F	Elmira	4
+F	Elvira	4
+M	Emil	3
+F	Erika	3
+F	Eugenia	4
+M	Eugeny	2
+F	Eva	4
+M	Evgeni	9
+F	Evgenia	7
+M	Evgenij	7
+F	Evgenija	5
+M	Evgeniy	8
+F	Evgeniya	6
+M	Evgeny	8
+F	Evgenya	3
+F	Ewgenia	5
+M	Fedja	1
+M	Fedja Fedor	1
+M	Fedor	4
+F	Gajana	2
+F	Galia	4
+F	Galija	3
+F	Galina	8
+F	Galiya	3
+F	Galja	3
+F	Galja Galina	1
+F	Galya	3
+M	Garri	3
+M	Garry	1
+F	Gayana	2
+M	Gena	1
+M	Genadi	1
+M	Gena Gennadi	1
+M	Gena Gennadij	1
+M	Gena Gennadiy	1
+M	Gennadi	7
+M	Gennadij	6
+M	Gennadiy	6
+M	Gennady	7
+M	Georgi	7
+M	Georgij	4
+M	Georgiy	6
+M	Georgy	6
+M	Gera	1
+M	German	5
+M	Gleb	5
+F	Gradislava	1
+M	Grigori	6
+M	Grigorij	5
+M	Grigoriy	6
+M	Grigory	5
+M	Grischa	2
+M	Grischa Grigori	2
+M	Grischa Grigorij	2
+M	Grisha	2
+M	Grisha Grigoriy	1
+M	Grisha Grigory	1
+F	Gulnara	4
+F	Guzel	3
+M	Igor	9
+M	Ildar	4
+M	Ilia	5
+M	Ilija	3
+M	Iliya	3
+M	Ilja	7
+F	Iljana	1
+F	Ilona	4
+M	Ilya	7
+F	Ilyana	1
+F	Inga	5
+F	Inna	7
+F	Iraida	4
+M	Irek	3
+M	Ivan	8
+M	Ivan Vanja	1
+M	Iwan	8
+M	Iwan Wanja	1
+M	Jakov	2
+F	Jana	7
+F	Janna	3
+F	Jarka	1
+F	Jarka Jaroslav	1
+M	Jaroslav	5
+F	Jaroslava	2
+M	Jascha	1
+M	Jegor	4
+F	Jekaterina	6
+F	Jelena	7
+M	Jevgeni	4
+F	Jevgenia	3
+M	Jevgenij	3
+M	Jewgeni	2
+M	Jewgenij	2
+M	Juli	1
+F	Julia	9
+M	Julian	1
+F	Juliana	4
+F	Julija	8
+F	Juliya	8
+M	Juri	9
+M	Jurij	7
+F	Karina	5
+F	Katia	1
+F	Katja	3
+F	Katja Jekaterina	1
+F	Katya	2
+F	Katya Yekaterina	1
+M	Kiril	5
+M	Kirill	6
+M	Kolja	1
+M	Kolja Anatoli	1
+M	Kolja Anatolij	1
+M	Kolya	1
+M	Kolya Anatoli	1
+M	Kolya Anatoly	1
+M	Konstantin	8
+M	Kostja	1
+M	Kostja Konstantin	1
+F	Kristina	4
+F	Ksenia	6
+F	Ksenija	5
+F	Kseniya	5
+F	Ksenja	4
+F	Ksenya	3
+F	Lada	2
+F	Lala	1
+F	Lana	2
+F	Lara	2
+F	Larisa	9
+F	Larissa	7
+M	Leonid	6
+M	Lev	5
+M	Lew	5
+F	Lidia	5
+F	Lidija	4
+F	Lidiya	4
+F	Lilia	7
+F	Lilija	5
+F	Liliya	5
+F	Lilya	2
+F	Lina	3
+F	Lioubov	3
+F	Liuba	2
+F	Liubov	6
+F	Liudmila	7
+F	Ljuba	2
+F	Ljuba Ljubov	1
+F	Ljubov	6
+F	Ljuda	1
+F	Ljuda Ljudmila	1
+F	Ljudmila	7
+F	Luba	1
+F	Lubov	6
+M	Ludmil	1
+F	Ludmila	8
+F	Lyuba	2
+F	Lyuba Lyubov	1
+F	Lyubov	6
+F	Lyuda	1
+F	Lyuda Lyudmila	1
+F	Lyudmila	7
+M	Magomed	4
+F	Maia	4
+F	Maija	1
+F	Maiya	1
+F	Maja	3
+M	Makhach	3
+M	Maksim	9
+M	Mansur	1
+M	Marat	5
+F	Margarita	6
+F	Maria	9
+F	Maria Mascha	4
+F	Maria Masha	3
+F	Marianna	4
+F	Marija	9
+F	Marija Mascha	4
+F	Marina	9
+F	Mariya	9
+F	Mariya Mascha	4
+F	Marta	3
+F	Mascha	3
+F	Masha	3
+F	Masha Mariya	3
+M	Matvei	2
+M	Max	2
+M	Maxim	8
+M	Max Maksim	1
+M	Max Maxim	1
+F	Maya	4
+M	Michail	9
+M	Mikhail	9
+F	Mila	3
+F	Milana	3
+F	Nadejda	5
+F	Nadezhda	8
+F	Nadia	4
+F	Nadja	4
+F	Nadya	4
+M	Nail	3
+F	Nailja	1
+F	Nailya	1
+F	Nargiz	1
+F	Nastja	2
+F	Nastja Anastasia	1
+F	Nastja Anastasija	1
+F	Nastya Anastasiya	1
+F	Natalia Natascha	5
+F	Natalia Natasha	5
+F	Natalija	6
+F	Natalija Natascha	3
+F	Nataliya	6
+F	Natalja Natascha	5
+F	Natalya Natasha	5
+F	Natascha	5
+F	Natasha	5
+F	Natasha Nataliya	3
+M	Nazar	1
+F	Nellya	1
+F	Nevena	1
+M	Nicolai	6
+M	Nicolay	6
+M	Nikita	5
+M	Nikolai	9
+M	Nikolaj	9
+M	Nikolay	9
+F	Nina	7
+F	Nona	3
+F	Oksana	9
+M	Oleg	9
+F	Olesia	5
+F	Olesja	6
+F	Olessia	5
+F	Olessja	6
+F	Olessya	6
+F	Olesya	6
+F	Oxana	8
+M	Pavel	8
+M	Pawel	8
+M	Peter	6
+M	Petja	1
+M	Petja Pjotr	1
+M	Petr	6
+M	Petya	1
+M	Petya Pyotr	1
+M	Piotr	3
+M	Pjotr	3
+F	Polina	5
+M	Pyotr	3
+F	Raisa	4
+F	Raissa	4
+M	Ramil	4
+F	Rasima	1
+F	Rassima	1
+F	Regina	3
+M	Renat	3
+F	Renata	4
+F	Rimma	4
+M	Robert	4
+M	Roman	8
+M	Rouslan	3
+F	Roza	4
+M	Ruslan	6
+F	Ruslana	2
+M	Rustam	3
+M	Rustem	4
+F	Sanja	1
+M	Sanja Sascha	1
+M	Sascha	2
+?	Sascha Aleksander	4
+?	Sascha Aleksandr	4
+?	Sascha Aleksandra	4
+?	Sascha Alexander	4
+?	Sascha Alexandr	4
+?	Sascha Alexandra	4
+M	Sasha	2
+?	Sasha Alexander	4
+?	Sasha Alexandr	4
+?	Sasha Alexandra	4
+M	Semen	5
+M	Sergeij	3
+M	Serguei	4
+M	Serguey	3
+M	Serjoscha	1
+M	Shamil	4
+M	Slava	2
+F	Slava Viacheslav	1
+F	Slava Vyacheslav	1
+M	Slawa	2
+M	Slawa Wjatscheslav	1
+F	Snezhana	3
+F	Sofia	6
+F	Sofija	1
+F	Sofiya	2
+F	Sofya	3
+F	Sonja	1
+F	Sonya	1
+M	Spartak	1
+M	Stanislav	7
+F	Stanislava	2
+M	Stanislaw	6
+M	Stas	3
+F	Stasja	1
+F	Stas Stanislav	1
+F	Stasya	1
+M	Stepan	4
+F	Sveta	2
+F	Sveta Svetlana	1
+F	Svetoslava	1
+M	Sviatoslav	2
+M	Svyatoslav	2
+F	Swetlana	9
+M	Swjatoslaw	1
+F	Taisia	4
+F	Taisija	2
+F	Taisya	3
+F	Talja	1
+F	Talya	1
+F	Tamara	6
+F	Tanja	2
+F	Tanja Tatiana	3
+F	Tanja Tatjana	3
+F	Tanya	2
+F	Tanya Tatiana	3
+F	Tanya Tatyana	3
+F	Tasja	1
+M	Timofei	4
+M	Timofej	4
+M	Timofey	4
+M	Timur	4
+M	Tolga	1
+F	Toma	2
+M	Trofim	2
+F	Uliana	1
+F	Uljana	4
+F	Ulyana	4
+M	Vadim	7
+M	Valentin	6
+F	Valentina	8
+M	Valeri	9
+F	Valeria	6
+M	Valerij	7
+F	Valerija	4
+M	Valeriy	7
+F	Valeriya	4
+M	Valery	8
+M	Vanja	1
+F	Varvara	4
+M	Vasili	8
+M	Vasilij	6
+F	Vasilisa	2
+M	Vasiliy	6
+M	Vasily	7
+M	Vasja Vasili	1
+M	Vasja Vasilij	1
+M	Vasja Vassili	1
+M	Vasja Vassilij	1
+M	Vassili	7
+M	Vassilij	2
+M	Vassiliy	3
+M	Vassily	4
+F	Venera	3
+M	Veniamin	2
+F	Vera	7
+F	Veronica	6
+F	Veronika	6
+M	Viacheslav	8
+M	Viatcheslav	6
+M	Victor	9
+F	Victoria	8
+F	Victoriya	6
+M	Viktor	9
+F	Viktoria	8
+F	Viktorija	6
+F	Viktoriya	6
+F	Viktorya	2
+F	Violetta	4
+M	Vitali	8
+M	Vitalij	6
+M	Vitaliy	7
+M	Vitaly	8
+M	Vjacheslav	7
+M	Vjatcheslav	6
+F	Vlada	3
+M	Vladilen	3
+F	Vladilena	1
+M	Vladislav	6
+F	Vladlena	3
+M	Vsevolod	2
+M	Vyacheslav	7
+M	Vyatcheslav	6
+M	Wadim	2
+M	Waleri	4
+M	Wanja	1
+M	Wasili	3
+M	Wasja Wassili	1
+M	Wassili	3
+M	Wassily	1
+F	Wera	4
+M	Wiktor	4
+M	Witali	4
+M	Witalij	2
+M	Wjatscheslaw	2
+M	Wladislaw	6
+M	Yakov	3
+F	Yana	7
+F	Yanna	3
+M	Yaroslav	4
+F	Yaroslava	2
+M	Yegor	4
+F	Yekaterina	6
+F	Yelena	7
+M	Yevgeni	5
+F	Yevgenia	2
+M	Yevgeniy	4
+M	Yevgeny	5
+M	Youri	2
+M	Yuli	1
+F	Yulia	9
+M	Yulian	1
+F	Yuliana	4
+F	Yulija	2
+M	Yuliy	1
+F	Yuliya	8
+F	Yulya	4
+M	Yuri	9
+M	Yuriy	7
+M	Yury	7
+F	Zaira	1
+M	Zaur	3
+M	Zduard	2
+F	Zemfira	3
+F	Zinaida	3
+F	Zoia	5
+F	Zoja	5
+F	Zoulfia	1
+F	Zoya	5
