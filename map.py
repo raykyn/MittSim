@@ -10,6 +10,8 @@ from tkinter import *
 class SimMap(object):
     
     def __init__(self, width, height):
+        self.reach_limit = 8
+        self.terrain_change_rate = 0.1
         self.height = height
         self.width = width
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
@@ -18,6 +20,7 @@ class SimMap(object):
         self.cities = []
         # generate culture data
         self.culture_models = start_Cultures()
+        self.game_map = None
 
     def printfield(self):
         for x in range(len(self.fields)):
@@ -27,15 +30,21 @@ class SimMap(object):
             
             
     def fillfield(self):
+        self.fieldIDs = {}
         self.fieldIDcounter = 1
         for x in range(self.height):
             for y in range(self.width):
                 newField = Field(self, self.fieldIDcounter, x, y)
-                self.fieldIDcounter += 1
-                self.setlevel(newField)
+                self.fieldIDs[newField.fieldID] = newField
                 self.fields[x][y] = newField
-                self._createCity(newField)
-                self._createRessources(newField)
+                self.fieldIDcounter += 1
+        
+        shuffled_IDs = list(range(1, self.fieldIDcounter))
+        random.shuffle(shuffled_IDs)
+        for fieldID in shuffled_IDs:
+            self.setlevel(self.fieldIDs[fieldID])
+            self._createCity(self.fieldIDs[fieldID])
+            self._createRessources(self.fieldIDs[fieldID])
         for c in self.cities:
             c.detect_ressources()
             c.calculate_values()
@@ -171,194 +180,81 @@ class SimMap(object):
         
         
     def setlevel(self, field):
-        if field.fieldID == 1:
-            field.height = 3
+        # 20 level system:
+        # - 0-1 ocean
+        # - 2-4 coastal
+        # - 5-8 lowlands
+        # - 9-13 grasslands
+        # - 14-16 highlands
+        # - 17-18 lower mountains
+        # - 19 high mountains
+        # The starting value is always the mean value of all neigbours
+        # (with dia?)
+        
+        total = 0
+        found_valids = 0
+        reach = 1
+        while found_valids == 0 and reach <= self.reach_limit:
+            neighbors = field.field_neighbor(reach)
+            try:
+                neighbors = neighbors.remove(self)
+            except:
+                pass
+            for n in neighbors:
+                if n.exact_height is not None:
+                    total += n.exact_height
+                    found_valids += 1
+            reach += 1 # search further
+        if found_valids == 0:
+            final = random.randint(0,19)
         else:
-            neighborheights = []
-            for element in field.neighbors:
-                if element[0] < 0 or element[1] < 0 or element[0] >= self.height or element[1] >= self.width:
-                    pass
-                elif type(self.fields[element[0]][element[1]]) == Field:
-                    neighborheights.append(self.fields[element[0]][element[1]].height)
-            if len(neighborheights) == 1:
-                randomnum = random.randint(1,10)
-                if neighborheights[0] == 0:
-                    if randomnum <= 2:
-                        field.height = 1
-                    else:
-                        field.height = 0
-                elif neighborheights[0] == 1:
-                    if randomnum <= 4:
-                        field.height = 0
-                    elif randomnum > 6:
-                        field.height = 2
-                    else:
-                        field.height = 1
-                elif neighborheights[0] == 2:
-                    if randomnum <= 4:
-                        field.height = 1
-                    elif randomnum > 6:
-                        field.height = 3
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 3:
-                    if randomnum <= 6:
-                        field.height = 3
-                    elif randomnum > 8:
-                        field.height = 2
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 4:
-                    if randomnum <= 3:
-                        field.height = 5
-                    elif randomnum > 7:
-                        field.height = 3
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 5:
-                    if randomnum <= 4:
-                        field.height = 4
-                    elif randomnum > 8:
-                        field.height = 6
-                    else:
-                        field.height = 5
-                elif neighborheights[0] == 6:
-                    if randomnum <= 3:
-                        field.height = 6
-                    else:
-                        field.height = 5
-            else:
-                randomnum = random.randint(1,10)
-                if neighborheights[0] == 0 and neighborheights[1] == 0:
-                    if randomnum <= 2:
-                        field.height = 1
-                    else:
-                        field.height = 0
-                elif neighborheights[0] == 0 and neighborheights[1] == 1:
-                    if randomnum <= 4:
-                        field.height = 1
-                    else:
-                        field.height = 0
-                elif neighborheights[0] == 1 and neighborheights[1] == 0:
-                    if randomnum <= 4:
-                        field.height = 1
-                    else:
-                        field.height = 0
-                elif neighborheights[0] == 1 and neighborheights[1] == 1:
-                    if randomnum <= 4:
-                        field.height = 0
-                    elif randomnum > 6:
-                        field.height = 2
-                    else:
-                        field.height = 1
-                elif neighborheights[0] == 2 and neighborheights[1] == 1:
-                    if randomnum <= 5:
-                        field.height = 1
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 1 and neighborheights[1] == 2:
-                    if randomnum <= 5:
-                        field.height = 1
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 2 and neighborheights[1] == 2:
-                    if randomnum <= 4:
-                        field.height = 1
-                    elif randomnum > 6:
-                        field.height = 3
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 3 and neighborheights[1] == 2:
-                    if randomnum <= 7:
-                        field.height = 3
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 2 and neighborheights[1] == 3:
-                    if randomnum <= 7:
-                        field.height = 3
-                    else:
-                        field.height = 2
-                elif neighborheights[0] == 3 and neighborheights[1] == 3:
-                    if randomnum <= 6:
-                        field.height = 3
-                    elif randomnum > 8:
-                        field.height = 2
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 4 and neighborheights[1] == 3:
-                    if randomnum <= 7:
-                        field.height = 3
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 3 and neighborheights[1] == 4:
-                    if randomnum <= 7:
-                        field.height = 3
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 4 and neighborheights[1] == 4:
-                    if randomnum <= 3:
-                        field.height = 5
-                    elif randomnum > 7:
-                        field.height = 3
-                    else:
-                        field.height = 4
-                elif neighborheights[0] == 5 and neighborheights[1] == 4:
-                    if randomnum <= 7:
-                        field.height = 4
-                    else:
-                        field.height = 5
-                elif neighborheights[0] == 4 and neighborheights[1] == 5:
-                    if randomnum <= 7:
-                        field.height = 4
-                    else:
-                        field.height = 5
-                elif neighborheights[0] == 5 and neighborheights[1] == 5:
-                    if randomnum <= 3:
-                        field.height = 4
-                    elif randomnum > 8:
-                        field.height = 6
-                    else:
-                        field.height = 5
-                elif neighborheights[0] == 6 and neighborheights[1] == 5:
-                    if randomnum <= 7:
-                        field.height = 5
-                    else:
-                        field.height = 6
-                elif neighborheights[0] == 5 and neighborheights[1] == 6:
-                    if randomnum <= 7:
-                        field.height = 5
-                    else:
-                        field.height = 6
-                elif neighborheights[0] == 6 and neighborheights[1] == 6:
-                    if randomnum <= 3:
-                        field.height = 5
-                    else:
-                        field.height = 6
-                elif neighborheights[0]-neighborheights[1] == 2:
-                    field.height = neighborheights[0]-1
-                elif neighborheights[1]-neighborheights[0] == 2:
-                    field.height = neighborheights[1]-1
-                
-    def create_tkinter(self):
-        self.root = Tk()
-        menu = Menu(self.root)
-        self.root.config(menu=menu)
-        filemenu = Menu(menu)
-        menu.add_cascade(label="Game", menu=filemenu)
-        filemenu.add_command(label="Exit", command=self._leave)
-        canvas = Canvas(self.root, borderwidth=0, width=1500, height=800)
-        frame = Frame(canvas)
-        vsb = Scrollbar(self.root, orient="vertical", command=canvas.yview)
-        hsb = Scrollbar(self.root, orient="horizontal", command=canvas.xview)
-        canvas.configure(yscrollcommand=vsb.set)
-        canvas.configure(xscrollcommand=hsb.set)
-        vsb.grid(sticky=N+E+S)
-        hsb.grid(sticky=W+S+E)
-        canvas.grid(row=0, column=0)
-        canvas.create_window((8,8), window=frame, anchor="nw")
-        frame.bind("<Configure>", lambda event, canvas=canvas: self._onFrameConfigure(canvas))
-        self.canvas_width = 15
-        self.canvas_height = 15
+            mean = (total/found_valids)
+            final = mean + random.uniform(-0.2, 0.2)
+            if final > 19:
+                final = 19
+            elif final < 0:
+                final = 0
+        field.exact_height = float(final)
+        final = int(final) # round down
+        h_dict = {
+            0:0,
+            1:0,
+            2:1,
+            3:1,
+            4:1,
+            5:2,
+            6:2,
+            7:2,
+            8:2,
+            9:3,
+            10:3,
+            11:3,
+            12:3,
+            13:3,
+            14:4,
+            15:4,
+            16:4,
+            17:5,
+            18:5,
+            19:6
+        }
+        field.height = h_dict[final]
+        
+    def _draw_map(self, canvas_stat):
+        self.canvas_width = canvas_stat
+        self.canvas_height = canvas_stat
+        if self.game_map is not None:
+            self.game_map.destroy()
+        self.game_window = Canvas(self.root, borderwidth=0, width=1500, height=800)
+        self.game_map = Frame(self.game_window)
+        self.vsb = Scrollbar(self.root, orient="vertical", command=self.game_window.yview)
+        self.hsb = Scrollbar(self.root, orient="horizontal", command=self.game_window.xview)
+        self.game_window.configure(yscrollcommand=self.vsb.set)
+        self.game_window.configure(xscrollcommand=self.hsb.set)
+        self.game_window.grid(row=0, column=0)
+        self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
+        self.game_map.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(self.game_window))
+        frame = self.game_map
         self.canvas_fields = {}
         for x in range(len(self.fields)):
             for y in range(len(self.fields[x])):
@@ -372,7 +268,26 @@ class SimMap(object):
                 #f.create_text(canvas_width/2, canvas_height/2, text=str(x)+str(y))
                 self.canvas_fields[self.fields[x][y].fieldID] = f
                 if self.fields[x][y].city is not None:
-                    self._draw_city(f, self.canvas_width, self.canvas_height)
+                    self._draw_city(f, self.fields[x][y].city, self.canvas_width, self.canvas_height)
+                elif self.fields[x][y].owner is not None:
+                    f.create_rectangle(1, 1, self.canvas_width-2, self.canvas_height-2, outline=self.fields[x][y].owner.color)
+        
+                
+    def create_tkinter(self):
+        self.root = Tk()
+        menu = Menu(self.root)
+        self.root.config(menu=menu)
+        filemenu = Menu(menu)
+        zoommenu = Menu(menu)
+        menu.add_cascade(label="Game", menu=filemenu)
+        menu.add_cascade(label="Zoom", menu=zoommenu)
+        zoommenu.add_command(label="100%", command=lambda c=8: self._draw_map(c))
+        zoommenu.add_command(label="150%", command=lambda c=12: self._draw_map(c))
+        zoommenu.add_command(label="200%", command=lambda c=16: self._draw_map(c))
+        filemenu.add_command(label="Exit", command=self._leave)
+        self._draw_map(12)
+        self.vsb.grid(row=0,column=1,sticky=N+E+S)
+        self.hsb.grid(row=1,column=0, sticky=W+S+E)
         #Set up a Box for all infos and description
         desc = Frame(self.root)
         desc.grid(row=0, column=2)
@@ -431,6 +346,12 @@ class SimMap(object):
         self._show_leader = StringVar(desc, "")
         show_leader = Label(desc, justify=LEFT, textvariable=self._show_leader)
         show_leader.grid(row=last_grid_row+5, column=1)
+        ##################CULTURE###########################
+        show_culture_desc = Label(desc, justify=LEFT, text="Culture:")
+        show_culture_desc.grid(row=last_grid_row+6, column=0)
+        self._show_culture = StringVar(desc, "")
+        show_culture = Label(desc, justify=LEFT, textvariable=self._show_culture)
+        show_culture.grid(row=last_grid_row+6, column=1)
         ########################CLOCK#############################
         date_frame = Frame(self.root)
         date_frame.grid(row=2, column=2)
@@ -482,6 +403,7 @@ class SimMap(object):
         # grow cities every 10 seconds
         for c in self.cities:
             if month % 10 == c.seed:
+                c.detect_ressources()
                 c.pop += (c.pop * c.growth)
                 if not c.active and c.pop > 50:
                     c.make_city(self.culture_models)
@@ -491,8 +413,8 @@ class SimMap(object):
         self._news.set("{} just became a city!".format(city.name))
         self.root.update()
         
-    def _draw_city(self, field, width, height):
-        field.create_rectangle(width/4, height/4, width*0.75, height*0.75, fill="purple", tag="city")
+    def _draw_city(self, field, city, width, height):
+        field.create_rectangle(width/4, height/4, width*0.75, height*0.75, fill=city.color, tag="city")
         
     def _onFrameConfigure(self, canvas):
         '''Reset the scroll region to encompass the inner frame'''
@@ -502,20 +424,24 @@ class SimMap(object):
         self._info_ID.set(str(field.fieldID))
         self._info_height.set(str(field.height))
         self._info_ress.set(str(field.ressource))
-        if field.city is not None:
-            self._city_name.set(field.city.name)
-            city_atts = field.city.getAttr()
+        if field.owner is not None:
+            self._city_name.set(field.owner.name)
+            city_atts = field.owner.getAttr()
             for attr, value in self.city_info.items():
                 if attr == "pop":
                     value.set(round(city_atts[attr]))
                 else:
                     value.set(city_atts[attr])
-            self._city_ressources.set('\n'.join(field.city.ressources))
-            self._food.set(field.city.values["f"])
-            self._production.set(field.city.values["p"])
-            self._money.set(field.city.values["m"])
-            if field.city.leader is not None:
-                self._show_leader.set(field.city.leader.fullname)
+            self._city_ressources.set('\n'.join(field.owner.ressources))
+            self._food.set(field.owner.values["f"])
+            self._production.set(field.owner.values["p"])
+            self._money.set(field.owner.values["m"])
+            if field.owner.culture is not None:
+                self._show_culture.set(field.owner.culture.name)
+            else:
+                self._show_culture.set("")
+            if field.owner.leader is not None:
+                self._show_leader.set(field.owner.leader.fullname)
             else:
                 self._show_leader.set("")
         else:
@@ -527,6 +453,7 @@ class SimMap(object):
             self._production.set("")
             self._money.set("")
             self._show_leader.set("")
+            self._show_culture.set("")
         self.root.update()
         
     #~ def _on_mousewheel(self, canvas):
@@ -546,7 +473,8 @@ class Field(object):
         self.y = y
         #Höhe: 0: Sealevel 1: Coastal 2: Lowlands 3: Flatlands 4: Highlands 
         #5: Low mountains 6: High Mountains
-        self.height = 7
+        self.height = None
+        self.exact_height = None
         self.city = None
         self._neighbors()
         self.ressource = None
@@ -593,25 +521,39 @@ class Field(object):
         self.dia_neighbors.extend(self.neighbors)
         
     def field_neighbor(self, reach):
-        x = self.x
-        y = self.y
         field_neighbors = []
-        neighbors = []
         fields = self.simMap.fields
-        closest_neighbors = [
-            (x+1, y),
-            (x-1, y),
-            (x, y+1),
-            (x, y-1)
-        ]
-        for xpos, ypos in closest_neighbors:
-            # check that pos is not outside of the map
+        #~ closest_neighbors = [
+            #~ (x+1, y),
+            #~ (x-1, y),
+            #~ (x, y+1),
+            #~ (x, y-1)
+        #~ ]
+        #~ field_neighbors.append(self)
+        #~ for xpos, ypos in closest_neighbors:
+            #~ # check that pos is not outside of the map
+            #~ if xpos >= 0 and ypos >= 0 and xpos < self.simMap.height and ypos < self.simMap.width:
+                #~ if reach >= 1:
+                    #~ field_neighbors.extend(fields[xpos][ypos].field_neighbor(reach-1))
+        #~ return list(set(field_neighbors))
+        all_coord = []
+        for n in range(1, reach+1): # n is current distance
+            combinations = []
+            # generate possible coordinates
+            for m in range(0,n+1):
+                k = n-m
+                combinations.append((k, m))
+                combinations.append((-k, m))
+                combinations.append((k, -m))
+                combinations.append((-k, -m))
+            all_coord.extend(combinations)
+        for x, y in set(all_coord):
+            xpos = self.x+x
+            ypos = self.y+y
             if xpos >= 0 and ypos >= 0 and xpos < self.simMap.height and ypos < self.simMap.width:
                 field_neighbors.append(fields[xpos][ypos])
-
-                if reach > 1:
-                    field_neighbors.extend(fields[xpos][ypos].field_neighbor(reach-1))
-        return set(field_neighbors)
+        return field_neighbors
+            
         
     def color(self):
         if self.height == 0:

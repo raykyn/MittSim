@@ -27,15 +27,12 @@ class City():
         self.leader = None
         
     def detect_ressources(self):
-        # maybe ressources and terrain should reset before being 
-        # detected again?
-        if self.field.ressource is not None:
-            self.ressources.append(self.field.ressource)
-            self.terrain.append(self.field.height)
+        self.ressources = []
+        self.terrain = []
         for f in self.field.field_neighbor(2):
-            if f.ressource is not None and (f.owner is None):
+            if f.ressource is not None and (f.owner is None or f.owner == self):
                 self.ressources.append(f.ressource)
-            elif (f.owner is None or f.owner == self.empire):
+            elif (f.owner is None or f.owner == self):
                 self.terrain.append(f.height)
                 
     def calculate_values(self):
@@ -104,17 +101,21 @@ class City():
         # Make all near cities your own culture!
         # Get a county name?
         # Get a leader!
-        self.culture = Culture()
-        self.name = self.culture.generate_name(models, "german_towns", "t")
-        while len(self.name) <= 4 or len(self.name) > 15 or ' ' in self.name:
-            self.name = self.culture.generate_name(models, "german_towns", "t")
-        self.culture.name = self.name + "ian"
+        new_culture = False
+        if self.culture == None:
+            self.culture = Culture()
+            new_culture = True
+        self.name = self.culture.generate_name(models, "t")
+        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name:
+            self.name = self.culture.generate_name(models, "t")
+        if new_culture:
+            self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self)
         r = lambda: random.randint(0,255)
         self.color = '#%02X%02X%02X' % (r(),r(),r())
-        for f in self.field.field_neighbor(3):
+        for f in self.field.field_neighbor(5):
             if f.city is not None:
-                if f.city.culture is None:
+                if f.city.culture == None:
                     f.city.culture = self.culture
         for f in self.field.field_neighbor(2):
             if f.owner is None:

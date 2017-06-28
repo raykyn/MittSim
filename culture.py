@@ -35,7 +35,7 @@ class start_Cultures():
             "vietnamese":"p_viet.txt",
             "korean":"p_korea.txt",
             "japanese":"p_japan.txt",
-            "arabia":"p_arabia.txt",
+            "arabian":"p_arabia.txt",
             "hebrew":"p_israel.txt",
             "georgian":"p_georgia.txt",
             "italian":"p_italy.txt"
@@ -44,13 +44,14 @@ class start_Cultures():
         for key, value in self.models.items():
             self.models[key] = self._build_model(path+value, self.n)
             
-        self.models["german_towns"] = self._build_town_model("data/towns_de.txt", self.n)
-        self.models["english_towns"] = self._build_town_model("data/towns.csv", self.n)
+        self.models["german_towns"] = self._build_town_model("data/towns_de.txt", self.n, "latin1")
+        self.models["english_towns"] = self._build_town_model("data/towns.csv", self.n, "utf8")
+        self.models["arabian_towns"] = self._build_town_model("data/SY_clear.txt", self.n, "utf8")
         
     def _build_model(self, infile, n):
         ngram_dict_m = Counter()
         ngram_dict_f = Counter()
-        with open(infile, mode="r") as inf:
+        with open(infile, mode="r", encoding="utf8") as inf:
             reader = csv.reader(inf, delimiter="\t")
             for row in reader:
                 ngrams = self._find_ngrams(row[1], n)
@@ -61,10 +62,11 @@ class start_Cultures():
                         ngram_dict_f[ngram] += int(row[2])
         return (ngram_dict_m, ngram_dict_f)
         
-    def _build_town_model(self, infile, n):
+    def _build_town_model(self, infile, n, enc="utf8"):
         ngram_dict = Counter()
-        with open(infile, mode="r", encoding="latin1") as inf:
+        with open(infile, mode="r", encoding=enc) as inf:
             for line in inf:
+                line = line.rstrip("\n")
                 ngrams = self._find_ngrams(line, n)
                 for ngram in ngrams:
                     ngram_dict[ngram] += 1
@@ -88,12 +90,24 @@ class start_Cultures():
     def get_n(self):
         return self.n
 
-class Culture():
+class Culture(object):
     def __init__(self):
         self.BOS_SYMBOL = object()
         self.EOS_SYMBOL = object()
         
         self.name = ""
+        
+        # Choose a culture as model
+        # At the moment
+        # - german
+        # - english
+        
+        possible = [
+            ("german", "german_towns"),
+            ("english", "english_towns"),
+            ("arabian", "arabian_towns")
+        ]
+        self.model = random.choice(possible)
 
         
     #~ def read_namelist(self, infile, outfile, pos):
@@ -210,14 +224,14 @@ class Culture():
             #~ name = re.sub(key, value, name)
         #~ return name
         
-    def generate_name(self, other, model, sex):
+    def generate_name(self, other, sex):
         n = other.n
         if sex == "m":
-            ngram_dict = other.get_model(model)[0]
+            ngram_dict = other.get_model(self.model[0])[0]
         elif sex == "f":
-            ngram_dict = other.get_model(model)[1]
+            ngram_dict = other.get_model(self.model[0])[1]
         elif sex == "t":
-            ngram_dict = other.get_model(model)
+            ngram_dict = other.get_model(self.model[1])
         else:
             print("No sex!")
         last_body = []
@@ -248,8 +262,10 @@ def main():
     init = start_Cultures()
     culture = Culture()
     #print(culture.generate_name(init, "german", "m"))
-    for i in range(0,9):
-        print(culture.generate_name(init, "german_towns", "t"))
+    name = culture.generate_name(init, "t") 
+    while len(name) < 6 or len(name) > 15 or ' ' in name or '-' in name:
+        name = culture.generate_name(init, "t")
+    print(name)
     
     #de_model = culture.build_model("data/person_names/p_ireland.txt", 3)
     #print(culture.generate_name(de_model[1], 3))
