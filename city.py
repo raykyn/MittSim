@@ -87,7 +87,7 @@ class City():
             self.values["m"] += ressource_dict[p]["m"]
             
     def calculate_growth(self):
-        # growth = 0.2 ist Maximum bei 40 Food
+        # growth = 0.05 ist Maximum bei 40 Food
         # Jedes Food darunter senkt Growth um 0.005
         food = self.values["f"]
         max_growth = 0.05 

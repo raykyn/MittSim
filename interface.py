@@ -80,7 +80,7 @@ class Application():
             if f.owner.leader is not None:
                 self.city_info_values["Leader:"].set(f.owner.leader.fullname)
             else:
-                self.city_info_values["Culture:"].set(None)
+                self.city_info_values["Leader:"].set(None)
             self.city_info_values["Population:"].set(round(f.owner.pop))
             if f.owner.culture is not None:
                 self.city_info_values["Culture:"].set(f.owner.culture.name)
