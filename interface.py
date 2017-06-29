@@ -44,7 +44,7 @@ class Application():
             for x, f in enumerate(row):
                 self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=f.color(), outline="", tag="field")
                 if f.city is not None:
-                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill="purple", tag="city")
+                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=f.owner.color, tag="city")
                 elif f.owner is not None:
                     self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=f.owner.color, tag="border")
                 elif f.owner is None:

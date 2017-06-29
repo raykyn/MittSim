@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 
-import regex as re
 import random
 import csv
 import math

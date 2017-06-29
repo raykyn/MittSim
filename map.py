@@ -11,8 +11,8 @@ from tkinter import *
 class SimMap(object):
     
     def __init__(self, width, height):
-        self.reach_limit = 8
-        self.terrain_change_rate = 0.1
+        self.reach_limit = 15
+        self.terrain_change_rate = 1.2
         self.height = height
         self.width = width
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
@@ -210,7 +210,7 @@ class SimMap(object):
             final = random.randint(0,19)
         else:
             mean = (total/found_valids)
-            final = mean + random.uniform(-0.2, 0.2)
+            final = mean + random.uniform(-self.terrain_change_rate, self.terrain_change_rate)
             if final > 19:
                 final = 19
             elif final < 0:
