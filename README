@@ -1,0 +1,5 @@
+Start program like this:
+~$ python3 maps.py
+
+You can set map width and height in the main-Function in map.py.
+To modify the "zoom", change the self.field_size value in interface.py.
