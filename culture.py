@@ -3,6 +3,8 @@
 import regex as re
 import random
 import csv
+import math
+import pickle
 from collections import Counter
 
 class start_Cultures():
@@ -11,31 +13,35 @@ class start_Cultures():
         
         self.n = 3
         
-        self.BOS_SYMBOL = object()
-        self.EOS_SYMBOL = object()
+        self.BOS_SYMBOL = "BOS"
+        self.EOS_SYMBOL = "EOS"
         
+    def load_all(self):
+        with open('data/models.pkl', 'rb') as f:
+            self.models = pickle.load(f)
+        
+    def build_all(self):
         path="data/person_names/"
-        
         self.models = {
-            "german":"p_germany.txt",
-            "french":"p_france.txt",
-            "english":"p_england.txt",
+            "german":"p_germany.txt", #done
+            "french":"p_france.txt", 
+            "english":"p_england.txt", #done
             "spanish":"p_spain.txt",
             "russian":"p_russia.txt",
-            "swedish":"p_sweden.txt",
-            "finnish":"p_finland.txt",
+            "swedish":"p_sweden.txt", #1
+            "finnish":"p_finland.txt", #2
             "greek":"p_greece.txt",
             "serbian":"p_serbia.txt",
             "irish":"p_ireland.txt",
             "bulgarian":"p_bulgaria.txt",
             "turkish":"p_turkey.txt",
             "steppes":"p_steppes.txt",
-            "chinese":"p_china.txt",
-            "indian":"p_india.txt",
+            "chinese":"p_china.txt", #3
+            "indian":"p_india.txt", #4
             "vietnamese":"p_viet.txt",
             "korean":"p_korea.txt",
-            "japanese":"p_japan.txt",
-            "arabian":"p_arabia.txt",
+            "japanese":"p_japan.txt", #5
+            "arabian":"p_arabia.txt", #done
             "hebrew":"p_israel.txt",
             "georgian":"p_georgia.txt",
             "italian":"p_italy.txt"
@@ -45,8 +51,17 @@ class start_Cultures():
             self.models[key] = self._build_model(path+value, self.n)
             
         self.models["german_towns"] = self._build_town_model("data/towns_de.txt", self.n, "latin1")
-        self.models["english_towns"] = self._build_town_model("data/towns.csv", self.n, "utf8")
+        self.models["english_towns"] = self._build_town_model("data/GB_clear.txt", self.n, "utf8")
         self.models["arabian_towns"] = self._build_town_model("data/SY_clear.txt", self.n, "utf8")
+        self.models["spanish_towns"] = self._build_town_model("data/ES_clear.txt", self.n, "utf8")
+        self.models["finnish_towns"] = self._build_town_model("data/FI_clear.txt", self.n, "utf8")
+        self.models["swedish_towns"] = self._build_town_model("data/SE_clear.txt", self.n, "utf8")
+        self.models["japanese_towns"] = self._build_town_model("data/JP_clear.txt", self.n, "utf8")
+        self.models["indian_towns"] = self._build_town_model("data/IN_clear.txt", self.n, "utf8")
+        self.models["russian_towns"] = self._build_town_model("data/RU_clear.txt", self.n, "utf8")
+        
+        with open('data/models.pkl', 'wb') as f:
+            pickle.dump(self.models, f, pickle.HIGHEST_PROTOCOL)
         
     def _build_model(self, infile, n):
         ngram_dict_m = Counter()
@@ -89,11 +104,12 @@ class start_Cultures():
         
     def get_n(self):
         return self.n
+        
 
 class Culture(object):
     def __init__(self):
-        self.BOS_SYMBOL = object()
-        self.EOS_SYMBOL = object()
+        self.BOS_SYMBOL = "BOS"
+        self.EOS_SYMBOL = "EOS"
         
         self.name = ""
         
@@ -105,124 +121,16 @@ class Culture(object):
         possible = [
             ("german", "german_towns"),
             ("english", "english_towns"),
-            ("arabian", "arabian_towns")
+            ("arabian", "arabian_towns"),
+            ("finnish", "finnish_towns"),
+            ("swedish", "swedish_towns"),
+            ("japanese", "japanese_towns"),
+            ("indian", "indian_towns"),
+            ("russian", "russian_towns"),
+            ("spanish", "spanish_towns"),
         ]
         self.model = random.choice(possible)
 
-        
-    #~ def read_namelist(self, infile, outfile, pos):
-        #~ genders = r'M|=|F|?'
-        #~ with open(infile, mode="r", encoding="latin1") as inf, \
-            #~ open(outfile, mode="w", encoding="utf8") as outf:
-            #~ for line in inf:
-                #~ if not line.startswith("#"):
-                    #~ m = re.match(r"(\??1?["+genders+"])\s+(\S+\s?\S+)\s+(.+)\$", line)
-                    #~ if m:
-                        #~ sex = m.group(1)
-                        #~ name = m.group(2)
-                        #~ name = self._replace_iso(name)
-                        #~ occ = m.group(3)
-                        #~ if sex == "?M" or sex == "1M":
-                            #~ sex = "M"
-                        #~ elif sex == "?F" or sex == "1F":
-                            #~ sex = "F"
-                        #~ elif sex == "=":
-                            #~ sex = lastsex
-                        #~ try:
-                            #~ if int(occ[-pos]) > 0:
-                                #~ print(sex, name)
-                                #~ outf.write("{}\t{}\t{}\n".format(sex, name, occ[-pos]))
-                        #~ except:
-                            #~ pass
-                        #~ lastsex = sex
-                    #~ else:
-                        #~ print(line)
-    
-    #~ def _replace_iso(self, name):
-        #~ repl_dict = {
-            #~ "<A/>":"\u0100",
-            #~ "<a/>":"\u0101",
-            #~ "<Â>":"\u0102",                                                     
-            #~ "<â>":"\u0103",                                                      
-            #~ "<A,>":"\u0104",                                                           
-            #~ "<a,>":"\u0105",
-            #~ "<C´>":"\u0106",                                                         
-            #~ "<c´>":"\u0107",                                                           
-            #~ "<C^>":"\u010C", 
-            #~ "<CH>":"\u010C",                                                     
-            #~ "<c^>":"\u010D", 
-            #~ "<ch>":"\u010D",
-            #~ "<d´>":"\u010F",                                                            
-            #~ "<Ð>":"\u0110",
-            #~ "<DJ>":"\u0110",                                                     
-            #~ "<ð>":"\u0111",
-            #~ "<dj>":"\u0111",                                                     
-            #~ "<E/>":"\u0112",                                                            
-            #~ "<e/>":"\u0113",                                                            
-            #~ "<E°>":"\u0116",                                                            
-            #~ "<e°>":"\u0117",                                                            
-            #~ "<E,>":"\u0118",                                                            
-            #~ "<e,>":"\u0119",                                                            
-            #~ "<Ê>":"\u011A",                                                             
-            #~ "<ê>":"\u011B",                                                           
-            #~ "<G\^>":"\u011E",                                                          
-            #~ "<g\^>":"\u011F",                                                            
-            #~ "<G,>":"\u0122",                                                            
-            #~ "<g´>":"\u0123",                                                            
-            #~ "<I/>":"\u012A",                                                            
-            #~ "<i/>":"\u012B",                                                            
-            #~ "<I°>":"\u0130",                                                            
-            #~ "<i>":"\u0131",                                                             
-            #~ "<IJ>":"\u0132",                                                            
-            #~ "<ij>":"\u0133",                                                            
-            #~ "<K,>":"\u0136",                                                            
-            #~ "<k,>":"\u0137",                                                            
-            #~ "<L,>":"\u013B",                                                            
-            #~ "<l,>":"\u013C",                                                            
-            #~ "<L´>":"\u013D",                                                            
-            #~ "<l´>":"\u013E",                                                            
-            #~ "<L/>":"\u0141",                                                            
-            #~ "<l/>":"\u0142",                                                            
-            #~ "<N,>":"\u0145",                                                            
-            #~ "<n,>":"\u0146",                                                            
-            #~ "<N\^>":"\u0147",                                                            
-            #~ "<n\^>":"\u0148",                                                            
-            #~ "<Ö>":"\u0150",                                                             
-            #~ "<ö>":"\u0151",                                                             
-            #~ "":"\u0152", 
-            #~ "<OE>":"\u0152",                                             
-            #~ "":"\u0153", 
-            #~ "<oe>":"\u0153",                                                       
-            #~ "<R\^>":"\u0158",                                                            
-            #~ "<r\^>":"\u0159",                                                            
-            #~ "<S,>":"\u015E",                                                            
-            #~ "<s,>":"\u015F",                                                            
-            #~ "":"\u0160",
-            #~ "<S\^>":"\u0160",
-            #~ "<SCH>":"\u0160", 
-            #~ "<SH>":"\u0160",                                 
-            #~ "":"\u0161", 
-            #~ "<s\^>":"\u0161", 
-            #~ "<sch>":"\u0161", 
-            #~ "<sh>":"\u0161",                                    
-            #~ "<T,>":"\u0162",                                                            
-            #~ "<t,>":"\u0163",                                                            
-            #~ "<t´>":"\u0165",                                                            
-            #~ "<U/>":"\u016A",                                                            
-            #~ "<u/>":"\u016B",                                                            
-            #~ "<U°>":"\u016E",                                                            
-            #~ "<u°>":"\u016F",                                                            
-            #~ "<U,>":"\u0172",                                                            
-            #~ "<u,>":"\u0173",                                                             
-            #~ "<Z°>":"\u017B",                                                             
-            #~ "<z°>":"\u017C",                                                             
-            #~ "<Z\^>":"\u017D",                                                             
-            #~ "<z\^>":"\u017E",                                                             
-            #~ "<ß>":"\u1E9E",  
-        #~ }
-        #~ for key, value in repl_dict.items():
-            #~ name = re.sub(key, value, name)
-        #~ return name
         
     def generate_name(self, other, sex):
         n = other.n
@@ -260,12 +168,16 @@ class Culture(object):
     
 def main():
     init = start_Cultures()
+    init.load_all()
     culture = Culture()
     #print(culture.generate_name(init, "german", "m"))
-    name = culture.generate_name(init, "t") 
-    while len(name) < 6 or len(name) > 15 or ' ' in name or '-' in name:
-        name = culture.generate_name(init, "t")
-    print(name)
+    for i in range(0,10):
+        name = culture.generate_name(init, "t") 
+        while len(name) < 6 or len(name) > 15 or ' ' in name or '-' in name:
+            name = culture.generate_name(init, "t")
+        print(name)
+    print(culture.model)
+    
     
     #de_model = culture.build_model("data/person_names/p_ireland.txt", 3)
     #print(culture.generate_name(de_model[1], 3))

@@ -5,6 +5,7 @@
 import random
 from city import City
 from culture import start_Cultures
+from interface import Application
 from tkinter import *
 
 class SimMap(object):
@@ -15,11 +16,11 @@ class SimMap(object):
         self.height = height
         self.width = width
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
-        self._job = None
         self.ressourceList()
         self.cities = []
         # generate culture data
         self.culture_models = start_Cultures()
+        self.culture_models.load_all()
         self.game_map = None
 
     def printfield(self):
@@ -274,144 +275,8 @@ class SimMap(object):
         
                 
     def create_tkinter(self):
-        self.root = Tk()
-        menu = Menu(self.root)
-        self.root.config(menu=menu)
-        filemenu = Menu(menu)
-        zoommenu = Menu(menu)
-        menu.add_cascade(label="Game", menu=filemenu)
-        menu.add_cascade(label="Zoom", menu=zoommenu)
-        zoommenu.add_command(label="100%", command=lambda c=8: self._draw_map(c))
-        zoommenu.add_command(label="150%", command=lambda c=12: self._draw_map(c))
-        zoommenu.add_command(label="200%", command=lambda c=16: self._draw_map(c))
-        filemenu.add_command(label="Exit", command=self._leave)
-        self._draw_map(12)
-        self.vsb.grid(row=0,column=1,sticky=N+E+S)
-        self.hsb.grid(row=1,column=0, sticky=W+S+E)
-        #Set up a Box for all infos and description
-        desc = Frame(self.root)
-        desc.grid(row=0, column=2)
-        self._info_ID = StringVar(desc, "")
-        info_ID1 = Label(desc, justify=LEFT, text="FIELD ID:")
-        info_ID1.grid(row=0, column=0)
-        info_ID = Label(desc, justify=LEFT, textvariable=self._info_ID, anchor=NW)
-        info_ID.grid(row=0, column=1)
-        self._info_height = StringVar(desc, "")
-        info_height = Label(desc, justify=LEFT, textvariable=self._info_height, anchor=NW)
-        info_height1 = Label(desc, justify=LEFT, text="FIELD HEIGHT:")
-        info_height.grid(row=1, column=1)
-        info_height1.grid(row=1, column=0)
-        self._info_ress = StringVar(desc, "")
-        info_ressL = Label(desc, justify=LEFT, text="RESSOURCE:")
-        info_ressL.grid(row=2, column=0)
-        info_ress = Label(desc, justify=LEFT, textvariable=self._info_ress, anchor=NW)
-        info_ress.grid(row=2, column=1)
-        self._city_name = StringVar(desc, "")
-        city_name = Message(desc, justify=LEFT, textvariable=self._city_name, anchor=NW, font="Verdana 30 bold", width=300)
-        city_name.grid(pady=20, columnspan=2)
-        city_attr = ["name", "empire", "county", "pop"]
-        self.city_info = {}
-        last_grid_row = 0
-        for i, attr in enumerate(city_attr):
-            self.city_info[attr] = StringVar(desc, "")
-            l1 = Label(desc, justify=LEFT, text=attr)
-            l1.grid(row=i+4, column=0)
-            l2 = Label(desc, justify=LEFT, textvariable=self.city_info[attr])
-            l2.grid(row=i+4, column=1)
-            last_grid_row = i+4
-        city_ressources_desc = Label(desc, justify=LEFT, text="City ressources:")
-        city_ressources_desc.grid(row=last_grid_row+1, column=0)
-        self._city_ressources = StringVar(desc, "")
-        city_ressources = Label(desc, justify=LEFT, textvariable=self._city_ressources)
-        city_ressources.grid(row=last_grid_row+1, column=1, sticky=W+E)
-        ######################SHOW VALUES####################
-        city_ressources_desc = Label(desc, justify=LEFT, text="Food:")
-        city_ressources_desc.grid(row=last_grid_row+2, column=0)
-        self._food = StringVar(desc, "")
-        city_ressources = Label(desc, justify=LEFT, textvariable=self._food)
-        city_ressources.grid(row=last_grid_row+2, column=1, sticky=W+E)
-        city_ressources_desc = Label(desc, justify=LEFT, text="Production:")
-        city_ressources_desc.grid(row=last_grid_row+3, column=0)
-        self._production = StringVar(desc, "")
-        city_ressources = Label(desc, justify=LEFT, textvariable=self._production)
-        city_ressources.grid(row=last_grid_row+3, column=1, sticky=W+E)
-        city_ressources_desc = Label(desc, justify=LEFT, text="Money:")
-        city_ressources_desc.grid(row=last_grid_row+4, column=0)
-        self._money = StringVar(desc, "")
-        city_ressources = Label(desc, justify=LEFT, textvariable=self._money)
-        city_ressources.grid(row=last_grid_row+4, column=1, sticky=W+E)
-        ########################LEADER#########################
-        show_leader_desc = Label(desc, justify=LEFT, text="Leader:")
-        show_leader_desc.grid(row=last_grid_row+5, column=0)
-        self._show_leader = StringVar(desc, "")
-        show_leader = Label(desc, justify=LEFT, textvariable=self._show_leader)
-        show_leader.grid(row=last_grid_row+5, column=1)
-        ##################CULTURE###########################
-        show_culture_desc = Label(desc, justify=LEFT, text="Culture:")
-        show_culture_desc.grid(row=last_grid_row+6, column=0)
-        self._show_culture = StringVar(desc, "")
-        show_culture = Label(desc, justify=LEFT, textvariable=self._show_culture)
-        show_culture.grid(row=last_grid_row+6, column=1)
-        ########################CLOCK#############################
-        date_frame = Frame(self.root)
-        date_frame.grid(row=2, column=2)
-        self.date = Label(date_frame)
-        self.date.grid(sticky=W+E, columnspan=4)
-        self.counter = 0 
-        self.speed = 1000
+        self.interface = Application(self, self.fields)
         
-        self.counter_label()
-        # Buttons to control game speed
-        speeds = [(100, "FAST"), (1000, "NORMAL"), (2000, "SLOW")]
-        col = 0
-        for sp, d in speeds:
-            btn = Button(date_frame, text=d, command= lambda speed=sp: self._set_speed(speed), width=5)
-            btn.grid(row=1, column=col)
-            col += 1
-        pause = Button(date_frame, text="PAUSE", command=self.cancel, width=5)
-        pause.grid(row=1, column=3)
-        
-        news_frame = Frame(self.root)
-        news_frame.grid(row=2, column=0)
-        self._news = StringVar(desc, "No news yet")
-        l = Label(news_frame, textvariable=self._news)
-        l.grid(row=1, column=0)
-            
-        mainloop()
-        
-    def cancel(self):
-        if self._job is not None:
-            self.date.after_cancel(self._job)
-            self._job = None
-        
-        
-    def counter_label(self):
-        def count():
-            # Add things happening here
-            self._events(self.counter)
-            self.counter += 1
-            self.date.config(text=str(self.counter))
-            self._job = self.date.after(self.speed, count)
-        count()
-    
-    def _set_speed(self, speed):
-        self.cancel()
-        self.speed = speed
-        self.counter_label()
-        
-    def _events(self, month):
-        #~ # grow cities every 10 seconds
-        for c in self.cities:
-            if int(str(month)[0]) == c.seed:
-                c.detect_ressources()
-                c.pop += (c.pop * c.growth)
-                if not c.active and c.pop > 50:
-                    c.make_city(self.culture_models)
-                    self.alert_new_city(c)
-                    
-    def alert_new_city(self, city):
-        self._news.set("{} just became a city!".format(city.name))
-        self.root.update()
         
     def _draw_city(self, field, city, width, height):
         field.create_rectangle(width/4, height/4, width*0.75, height*0.75, fill=city.color, tag="city")
@@ -581,6 +446,7 @@ class Field(object):
         
 def main():
     newmap = SimMap(180,90)
+    #newmap = SimMap(20, 10)
     newmap.fillfield()
     newmap.create_tkinter()
 

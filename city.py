@@ -13,7 +13,7 @@ class City():
         self.culture_name = ""
         self.color = "purple"
         self.active = False
-        self.pop = random.randint(15, 30)
+        self.pop = random.randint(100, 300)
         self.tech = 0
         self.simMap = simMap
         self.fields = simMap.fields
@@ -91,17 +91,12 @@ class City():
         # Jedes Food darunter senkt Growth um 0.005
         food = self.values["f"]
         max_growth = 0.05 
-        missing_food = float(40 - food)*0.00125
+        missing_food = float((self.pop*0.1) - food)*0.00125
         self.growth = max_growth - missing_food
         
         
-    def make_city(self, models):
+    def make_city(self, models, interface):
         self.active = True
-        # get a culture name!
-        # get a city name!
-        # Make all near cities your own culture!
-        # Get a county name?
-        # Get a leader!
         new_culture = False
         if self.culture == None:
             self.culture = Culture()
@@ -118,19 +113,25 @@ class City():
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
+        self.change_color(interface)
         for f in self.field.field_neighbor(2):
             if f.owner is None:
                 f.owner = self
-                self.change_color()
-                self.claim_field(f.fieldID)
+                self.claim_field(f, interface)
+        interface.inner_map.update_idletasks()
                 
-    def change_color(self):
-        self.simMap.canvas_fields[self.field.fieldID].itemconfig("city", fill=self.color)
+    def change_color(self, interface):
+        xpos = (self.x*interface.field_size)+interface.field_size/2
+        ypos = (self.y*interface.field_size)+interface.field_size/2
+        c = interface.inner_map.find_closest(ypos, xpos)[0]
+        interface.inner_map.itemconfig(c, fill=self.color)
         
-    def claim_field(self, fieldID):
-        canvas = self.simMap.canvas_fields[fieldID]
-        canvas.create_rectangle(1, 1, self.simMap.canvas_width-2, self.simMap.canvas_height-2, outline=self.color)
         
+    def claim_field(self, field, interface):
+        xpos = (field.x*interface.field_size)+1
+        ypos = (field.y*interface.field_size)+1
+        c = interface.inner_map.find_closest(ypos, xpos)[0]
+        interface.inner_map.itemconfig(c, outline=self.color)
         
         
     def getAttr(self):
