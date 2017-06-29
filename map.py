@@ -400,9 +400,9 @@ class SimMap(object):
         self.counter_label()
         
     def _events(self, month):
-        # grow cities every 10 seconds
+        #~ # grow cities every 10 seconds
         for c in self.cities:
-            if month % 10 == c.seed:
+            if int(str(month)[0]) == c.seed:
                 c.detect_ressources()
                 c.pop += (c.pop * c.growth)
                 if not c.active and c.pop > 50:

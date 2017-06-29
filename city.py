@@ -14,6 +14,7 @@ class City():
         self.color = "purple"
         self.active = False
         self.pop = random.randint(15, 30)
+        self.tech = 0
         self.simMap = simMap
         self.fields = simMap.fields
         self.field = field
@@ -39,8 +40,8 @@ class City():
         # Dictionary for what terrain the city gets what
         # Three general ressources:
         # - food (important for growth)
-        # - production (important if war)
-        # - money (important for trade and technology)
+        # - production (important if war and technology)
+        # - money (important for trade, war and culture)
         terrain_dict = {
             0:{"f":1,"p":0,"m":3},
             1:{"f":3,"p":0,"m":1},
@@ -89,7 +90,7 @@ class City():
         # growth = 0.2 ist Maximum bei 40 Food
         # Jedes Food darunter senkt Growth um 0.005
         food = self.values["f"]
-        max_growth = 0.05
+        max_growth = 0.05 
         missing_food = float(40 - food)*0.00125
         self.growth = max_growth - missing_food
         
