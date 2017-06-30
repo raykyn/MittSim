@@ -356,6 +356,9 @@ class Field(object):
         return toPrint
         
     def _neighbors(self):
+        """This method is still in use on one field, but is subject to 
+        change as soon as I've got a better method of only getting
+        the direct neighbors"""
         self.neighbors = []
         self.upN = (self.x,self.y-1)
         self.neighbors.append(self.upN)
@@ -379,19 +382,6 @@ class Field(object):
     def field_neighbor(self, reach):
         field_neighbors = []
         fields = self.simMap.fields
-        #~ closest_neighbors = [
-            #~ (x+1, y),
-            #~ (x-1, y),
-            #~ (x, y+1),
-            #~ (x, y-1)
-        #~ ]
-        #~ field_neighbors.append(self)
-        #~ for xpos, ypos in closest_neighbors:
-            #~ # check that pos is not outside of the map
-            #~ if xpos >= 0 and ypos >= 0 and xpos < self.simMap.height and ypos < self.simMap.width:
-                #~ if reach >= 1:
-                    #~ field_neighbors.extend(fields[xpos][ypos].field_neighbor(reach-1))
-        #~ return list(set(field_neighbors))
         all_coord = []
         for n in range(1, reach+1): # n is current distance
             combinations = []

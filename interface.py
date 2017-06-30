@@ -5,6 +5,7 @@
 import random
 from city import City
 from culture import start_Cultures
+import events
 from tkinter import *
 
 
@@ -224,14 +225,7 @@ class Application():
         self.counter_label()
         
     def _events(self, tick):
-        #~ # grow cities every 10 seconds
-        for c in self.game.cities:
-            if c.seed == int(str(tick)[-1]) and not c.active:
-                c.calculate_growth()
-                c.pop = c.pop + (c.pop*c.growth)
-                if c.pop > 500:
-                    c.make_city(self.game.culture_models, self)
-                    self._alert_new_city(c)
+        events.run(tick, self.game, self)
                    
                     
     def _alert_new_city(self, city):

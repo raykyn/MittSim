@@ -13,7 +13,7 @@ class City():
         self.culture_name = ""
         self.color = "purple"
         self.active = False
-        self.pop = random.randint(100, 300)
+        self.pop = random.randint(150, 450)
         self.tech = 0
         self.simMap = simMap
         self.fields = simMap.fields
@@ -30,6 +30,9 @@ class City():
     def detect_ressources(self):
         self.ressources = []
         self.terrain = []
+        if self.field.ressource is not None:
+            self.ressources.append(self.field.ressource)
+        self.terrain.append(self.field.height)
         for f in self.field.field_neighbor(2):
             if f.ressource is not None and (f.owner is None or f.owner == self):
                 self.ressources.append(f.ressource)
@@ -77,6 +80,7 @@ class City():
             "copper":{"f":0,"p":2,"m":0}, # Substitute for iron
             "stone":{"f":0,"p":2,"m":0} # Bonus in Defensive Warfare
         }
+        self.values = {"f":0,"p":0,"m":0}
         for t in self.terrain:
             self.values["f"] += terrain_dict[t]["f"]
             self.values["p"] += terrain_dict[t]["p"]
@@ -87,12 +91,32 @@ class City():
             self.values["m"] += ressource_dict[p]["m"]
             
     def calculate_growth(self):
-        # growth = 0.05 ist Maximum bei 40 Food
-        # Jedes Food darunter senkt Growth um 0.005
+        # We assume a maximum population growth a little higher then 
+        # the high medieval ages (doubled pop in 300 yrs).
+        # In 10 Ticks (Months), the population grows by 0.5% at max
+        # With this model, most cities will reach active status around
+        # Tick 140 (around 12 yrs), depending on food (around 20 food is
+        # needed to get max_growth wiht 500 Pop) 1000 pop is the ceiling
+        # for a city with 20 Food.
         food = self.values["f"]
-        max_growth = 0.05 
-        missing_food = float((self.pop*0.1) - food)*0.00125
-        self.growth = max_growth - missing_food
+        max_growth = 0.005 
+        # Each person consumes 0.02 Food units
+        # The more food is accessible per Person, the higher the max
+        # growth is.
+        # if food == pop*0.02 => growth = 0
+        # elif food == pop*0.02 => growth = 0.005
+        # Check first if enough food to sustain pop
+        # (This can lead to some cities never becoming real cities bc of
+        # missing food if other cities grab their fields)
+        nec_food =  self.pop*0.02
+        remaining_food = food-nec_food
+        if remaining_food > nec_food:
+            remaining_food = nec_food # Excess food can and should be 
+            # traded off. Villages in the mountains will try to get food,
+            # While villages in the plains will try to get metals and stone.
+            # If a city lacks food to grow further, it will also more likely
+            # go to war to steal food or conquer villages with excess food.
+        self.growth = max_growth * (remaining_food/nec_food)
         
         
     def make_city(self, models, interface):
@@ -125,6 +149,7 @@ class City():
         ypos = (self.y*interface.field_size)+interface.field_size/2
         c = interface.inner_map.find_closest(ypos, xpos)[0]
         interface.inner_map.itemconfig(c, fill=self.color)
+        interface.inner_map.update_idletasks()
         
         
     def claim_field(self, field, interface):
