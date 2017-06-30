@@ -3,6 +3,7 @@
 #By Ismail Prada
 
 import random
+from collections import Counter
 from city import City
 from culture import start_Cultures
 from interface import Application
@@ -11,10 +12,18 @@ from tkinter import *
 class SimMap(object):
     
     def __init__(self, width, height):
-        self.reach_limit = 15
-        self.terrain_change_rate = 1.2
+        self.reach_limit = 10
+        self.terrain_change_rate = 0.5
+        self.ocean_chance = 1
+        self.coastal_chance = 3
+        self.lowlands_chance = 4
+        self.woodlands_chance = 4
+        self.highlands_chance = 4
+        self.lower_m_chance = 2
+        self.higher_m_chance = 1
         self.height = height
         self.width = width
+        self.city_generation_chance = 0.15
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
         self.ressourceList()
         self.cities = []
@@ -31,6 +40,16 @@ class SimMap(object):
             
             
     def fillfield(self):
+        self.terrain_chances = Counter({
+            0:self.ocean_chance,
+            1:self.coastal_chance,
+            2:self.lowlands_chance,
+            3:self.woodlands_chance,
+            4:self.highlands_chance,
+            5:self.lower_m_chance,
+            6:self.higher_m_chance
+        })
+        self.sorted_terrain_chances = sorted(list(self.terrain_chances.elements()))
         self.fieldIDs = {}
         self.fieldIDcounter = 1
         for x in range(self.height):
@@ -60,14 +79,15 @@ class SimMap(object):
                     return None
             except:
                 pass
+        city_gen = self.city_generation_chance*100
         m = random.randint(1,100)
-        if (field.height == 2 or field.height == 3) and m < 16:
+        if (field.height == 2 or field.height == 3) and m <= city_gen:
             field.createCity(self, field.x, field.y)
-        elif field.height == 4 and m < 10:
+        elif field.height == 4 and m <= city_gen*0.65:
             field.createCity(self, field.x, field.y)
-        elif field.height == 5 and m < 6:
+        elif field.height == 5 and m <= city_gen*0.3:
             field.createCity(self, field.x, field.y)
-        elif field.height == 6 and m < 3:
+        elif field.height == 6 and m <= city_gen*0.15:
             field.createCity(self, field.x, field.y)
             
     def ressourceList(self):
@@ -181,16 +201,9 @@ class SimMap(object):
         
         
     def setlevel(self, field):
-        # 20 level system:
-        # - 0-1 ocean
-        # - 2-4 coastal
-        # - 5-8 lowlands
-        # - 9-13 grasslands
-        # - 14-16 highlands
-        # - 17-18 lower mountains
-        # - 19 high mountains
-        # The starting value is always the mean value of all neigbours
-        # (with dia?)
+        # No level system anymore as user can input probabilities for
+        # terrain_types himself
+        terrain_chances = self.sorted_terrain_chances
         
         total = 0
         found_valids = 0
@@ -207,39 +220,17 @@ class SimMap(object):
                     found_valids += 1
             reach += 1 # search further
         if found_valids == 0:
-            final = random.randint(0,19)
+            final = random.randint(0,len(terrain_chances)-1)
         else:
             mean = (total/found_valids)
             final = mean + random.uniform(-self.terrain_change_rate, self.terrain_change_rate)
-            if final > 19:
-                final = 19
+            if final > len(terrain_chances)-1:
+                final = len(terrain_chances)-1
             elif final < 0:
                 final = 0
         field.exact_height = float(final)
         final = int(final) # round down
-        h_dict = {
-            0:0,
-            1:0,
-            2:1,
-            3:1,
-            4:1,
-            5:2,
-            6:2,
-            7:2,
-            8:2,
-            9:3,
-            10:3,
-            11:3,
-            12:3,
-            13:3,
-            14:4,
-            15:4,
-            16:4,
-            17:5,
-            18:5,
-            19:6
-        }
-        field.height = h_dict[final]
+        field.height = terrain_chances[final]
         
     def _draw_map(self, canvas_stat):
         self.canvas_width = canvas_stat
@@ -446,7 +437,6 @@ class Field(object):
         
 def main():
     newmap = SimMap(180,90)
-    #newmap = SimMap(20, 10)
     newmap.fillfield()
     newmap.create_tkinter()
 

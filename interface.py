@@ -20,12 +20,14 @@ class Application():
         self.speed = 1000
         # Initialize everything
         self.root = Tk()
+        self.root.title("MyLittleFantasySimulator")
         self._create_menu()
         self._create_game_map_frame()
         self._create_scrollbars()
         self._create_description_frame()
         self._create_news_frame()
         self._create_date_frame()
+        # create a dialogue in which the user can input his own settings? => Startup
         self.create_map(fields)
         
         mainloop()
