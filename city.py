@@ -51,8 +51,8 @@ class City():
             2:{"f":2,"p":1,"m":1},
             3:{"f":2,"p":1,"m":1},
             4:{"f":1.5,"p":1.5,"m":1},
-            5:{"f":1,"p":2,"m":1},
-            6:{"f":0,"p":2,"m":2}
+            5:{"f":1.25,"p":2,"m":1},
+            6:{"f":0.5,"p":2,"m":1.5}
         }
         ressource_dict = {
             "fishes":{"f":2,"p":0,"m":0},
@@ -137,6 +137,7 @@ class City():
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
+                    f.city.change_color(interface)
         if interface.mapmode != "t":
             self.change_color(interface)
         for f in self.field.field_neighbor(2):
@@ -149,7 +150,7 @@ class City():
     def change_color(self, interface):
         xpos = (self.x*interface.field_size)+interface.field_size/2
         ypos = (self.y*interface.field_size)+interface.field_size/2
-        c = interface.inner_map.find_closest(ypos, xpos)[0]
+        c = interface.inner_map.find_closest(ypos, xpos)
         if interface.mapmode == "p":
             color = self.color
         elif interface.mapmode == "c":
@@ -161,7 +162,7 @@ class City():
     def claim_field(self, field, interface):
         xpos = (field.x*interface.field_size)+1
         ypos = (field.y*interface.field_size)+1
-        c = interface.inner_map.find_closest(ypos, xpos)[0]
+        c = interface.inner_map.find_closest(ypos, xpos)
         if interface.mapmode == "p":
             color = self.color
         elif interface.mapmode == "c":

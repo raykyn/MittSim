@@ -56,7 +56,7 @@ class Application():
                             if f.owner.culture is not None:
                                 citycolor = f.owner.culture.color
                             else:
-                                citycolor = ""
+                                citycolor = "white"
                         self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
                     elif f.owner is not None:
                         if self.mapmode == "p": # political
