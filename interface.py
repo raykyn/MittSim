@@ -137,7 +137,7 @@ class Application():
         mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
         mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
         mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))
-        mapmodes.add_command(label="No Terrain", command=self._turn_off_terrain)
+        mapmodes.add_command(label="Toggle Terrain", command=self._toggle_terrain)
         
     def _zoom(self, size):
         self.field_size = size
@@ -147,8 +147,11 @@ class Application():
         self.mapmode = mode
         self.create_map(self.fields)
         
-    def _turn_off_terrain(self):
-        self.show_terrain = False
+    def _toggle_terrain(self):
+        if self.show_terrain:
+            self.show_terrain = False
+        else:
+            self.show_terrain = True
         self.create_map(self.fields)
     
         
@@ -232,7 +235,7 @@ class Application():
         date_frame.grid(row=2, column=2)
         self.date = Label(date_frame)
         self.date.grid(sticky=W+E, columnspan=4)
-        speeds = [(100, "FAST"), (1000, "NORMAL"), (2000, "SLOW")]
+        speeds = [(100, "FAST"), (1000, "NORMAL"), (3000, "SLOW")]
         col = 0
         for sp, d in speeds:
             btn = Button(date_frame, text=d, command= lambda speed=sp: self._set_speed(speed), width=5)
