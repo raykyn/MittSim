@@ -47,10 +47,10 @@ class City():
         # - money (important for trade, war and culture)
         terrain_dict = {
             0:{"f":1,"p":0,"m":3},
-            1:{"f":3,"p":0,"m":1},
+            1:{"f":2.5,"p":0,"m":1.5},
             2:{"f":2,"p":1,"m":1},
             3:{"f":2,"p":1,"m":1},
-            4:{"f":1,"p":2,"m":1},
+            4:{"f":1.5,"p":1.5,"m":1},
             5:{"f":1,"p":2,"m":1},
             6:{"f":0,"p":2,"m":2}
         }
@@ -121,34 +121,40 @@ class City():
         
     def make_city(self, models, interface):
         self.active = True
+        r = lambda: random.randint(0,255)
+        self.color = '#%02X%02X%02X' % (r(),r(),r())
         new_culture = False
         if self.culture == None:
-            self.culture = Culture()
+            self.culture = Culture(self.color)
             new_culture = True
         self.name = self.culture.generate_name(models, "t")
         while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name:
             self.name = self.culture.generate_name(models, "t")
         if new_culture:
             self.culture.name = self.name + "ian"
-        self.leader = Character(models, self.culture, self)
-        r = lambda: random.randint(0,255)
-        self.color = '#%02X%02X%02X' % (r(),r(),r())
+        self.leader = Character(models, self.culture, self, 40)
         for f in self.field.field_neighbor(5):
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
-        self.change_color(interface)
+        if interface.mapmode != "t":
+            self.change_color(interface)
         for f in self.field.field_neighbor(2):
             if f.owner is None:
                 f.owner = self
-                self.claim_field(f, interface)
+                if interface.mapmode != "t":
+                    self.claim_field(f, interface)
         interface.inner_map.update_idletasks()
                 
     def change_color(self, interface):
         xpos = (self.x*interface.field_size)+interface.field_size/2
         ypos = (self.y*interface.field_size)+interface.field_size/2
         c = interface.inner_map.find_closest(ypos, xpos)[0]
-        interface.inner_map.itemconfig(c, fill=self.color)
+        if interface.mapmode == "p":
+            color = self.color
+        elif interface.mapmode == "c":
+            color = self.culture.color
+        interface.inner_map.itemconfig(c, fill=color)
         interface.inner_map.update_idletasks()
         
         
@@ -156,7 +162,11 @@ class City():
         xpos = (field.x*interface.field_size)+1
         ypos = (field.y*interface.field_size)+1
         c = interface.inner_map.find_closest(ypos, xpos)[0]
-        interface.inner_map.itemconfig(c, outline=self.color)
+        if interface.mapmode == "p":
+            color = self.color
+        elif interface.mapmode == "c":
+            color = self.culture.color
+        interface.inner_map.itemconfig(c, outline=color)
         
         
     def getAttr(self):

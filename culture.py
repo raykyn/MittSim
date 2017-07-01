@@ -106,7 +106,7 @@ class start_Cultures():
         
 
 class Culture(object):
-    def __init__(self):
+    def __init__(self, color):
         self.BOS_SYMBOL = "BOS"
         self.EOS_SYMBOL = "EOS"
         
@@ -129,6 +129,8 @@ class Culture(object):
             ("spanish", "spanish_towns"),
         ]
         self.model = random.choice(possible)
+        
+        self.color = color
 
         
     def generate_name(self, other, sex):

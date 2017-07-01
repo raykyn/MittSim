@@ -13,6 +13,7 @@ class Application():
     def __init__(self, game, fields):
         # Some attributes
         self.game = game
+        self.mapmode = "p"
         self.fields = fields
         self.field_size = 12
         # Changing counters
@@ -43,15 +44,28 @@ class Application():
         map_height = len(fields)*size
         map_width = len(fields[0])*size
         self.inner_map = Canvas(frame, width=map_width, height=map_height)
+        
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
                 self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=f.color(), outline="", tag="field")
-                if f.city is not None:
-                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=f.owner.color, tag="city")
-                elif f.owner is not None:
-                    self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=f.owner.color, tag="border")
-                elif f.owner is None:
-                    self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
+                if self.mapmode != "t":
+                    if f.city is not None:
+                        if self.mapmode == "p": # political
+                            citycolor = f.owner.color
+                        elif self.mapmode == "c": # cultural
+                            if f.owner.culture is not None:
+                                citycolor = f.owner.culture.color
+                            else:
+                                citycolor = ""
+                        self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
+                    elif f.owner is not None:
+                        if self.mapmode == "p": # political
+                            bordercolor = f.owner.color
+                        elif self.mapmode == "c": # cultural
+                            bordercolor = f.owner.culture.color
+                        self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
+                    elif f.owner is None:
+                        self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
         self.inner_map.bind("<Button-1>", self._get_field)
         self.inner_map.pack()
         
@@ -104,16 +118,26 @@ class Application():
         self.root.config(menu=menu)
         filemenu = Menu(menu)
         zoommenu = Menu(menu)
+        mapmodes = Menu(menu)
         menu.add_cascade(label="Game", menu=filemenu)
         menu.add_cascade(label="Zoom", menu=zoommenu)
+        menu.add_cascade(label="Mapmodes", menu=mapmodes)
         filemenu.add_command(label="Exit", command=self._leave)
         zoommenu.add_command(label="All", command= lambda x=8: self._zoom(x))
         zoommenu.add_command(label="Normal", command= lambda x=12: self._zoom(x))
         zoommenu.add_command(label="Close", command= lambda x=16: self._zoom(x))
+        mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
+        mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
+        mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))
         
     def _zoom(self, size):
         self.field_size = size
         self.create_map(self.fields)
+        
+    def _change_mapmode(self, mode):
+        self.mapmode = mode
+        self.create_map(self.fields)
+    
         
     def _create_game_map_frame(self):
         self.game_window = Canvas(self.root, borderwidth=0, width=1500, height=800)
