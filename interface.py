@@ -14,6 +14,7 @@ class Application():
         # Some attributes
         self.game = game
         self.mapmode = "p"
+        self.show_terrain = True
         self.fields = fields
         self.field_size = 12
         # Changing counters
@@ -47,7 +48,14 @@ class Application():
         
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
-                self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=f.color(), outline="", tag="field")
+                if self.show_terrain:
+                    terrain_color = f.color()
+                else:
+                    if f.height <= 1:
+                        terrain_color = f.color()
+                    else:
+                        terrain_color = "white"
+                self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag="field")
                 if self.mapmode != "t":
                     if f.city is not None:
                         if self.mapmode == "p": # political
@@ -129,6 +137,7 @@ class Application():
         mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
         mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
         mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))
+        mapmodes.add_command(label="No Terrain", command=self._turn_off_terrain)
         
     def _zoom(self, size):
         self.field_size = size
@@ -136,6 +145,10 @@ class Application():
         
     def _change_mapmode(self, mode):
         self.mapmode = mode
+        self.create_map(self.fields)
+        
+    def _turn_off_terrain(self):
+        self.show_terrain = False
         self.create_map(self.fields)
     
         

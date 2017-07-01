@@ -128,7 +128,7 @@ class City():
             self.culture = Culture(self.color)
             new_culture = True
         self.name = self.culture.generate_name(models, "t")
-        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name:
+        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name or ')' in self.name:
             self.name = self.culture.generate_name(models, "t")
         if new_culture:
             self.culture.name = self.name + "ian"
