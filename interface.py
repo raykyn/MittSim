@@ -21,6 +21,7 @@ class Application():
         self._job = None
         self.counter = 0
         self.speed = 1000
+        self.showing_city = None # The currently shown city
         # Initialize everything
         self.root = Tk()
         self.root.title("MyLittleFantasySimulator")
@@ -103,7 +104,7 @@ class Application():
         if f.owner is not None:
             self._city_name.set(f.owner.name)
             if f.owner.leader is not None:
-                self.city_info_values["Leader:"].set(f.owner.leader.fullname)
+                self.city_info_values["Leader:"].set(f.owner.leader.firstname)
             else:
                 self.city_info_values["Leader:"].set(None)
             self.city_info_values["Population:"].set(round(f.owner.pop))
@@ -115,10 +116,17 @@ class Application():
             self.city_info_values["Production:"].set(f.owner.values["p"])
             self.city_info_values["Money:"].set(f.owner.values["m"])
             self.city_info_values["Ressources:"].set(', '.join(f.owner.ressources))
+            self.char_info.pack_forget()
+            self.showing = f.owner
+            self.city_info.pack(fill="both")
+            self.emp_info.pack(fill="both")
         else:
             self._city_name.set("")
             for l in self.city_info_values:
                 self.city_info_values[l].set("")
+            self.city_info.pack_forget()
+            self.emp_info.pack_forget()
+        
 
         
     def _create_menu(self):
@@ -181,6 +189,7 @@ class Application():
         # Field-Info, City-Info, Empire-Info
         self._field_info(desc)
         self._city_info(desc)
+        self._char_info(desc)
         self._emp_info(desc)
         
     def _field_info(self, desc):
@@ -198,11 +207,11 @@ class Application():
             Label(field_info, justify=LEFT, textvariable=self.field_info_values[label]).grid(row=n, column=1, sticky=N+W)
         
     def _city_info(self, desc):
-        city_info = Frame(desc, width=300, height=300, relief=RIDGE)
-        city_info.pack(fill="both")
+        self.city_info = Frame(desc, width=300, height=300, relief=RIDGE)
+        #self.city_info.pack(fill="both")
         self._city_name = StringVar(desc, "")
-        city_name = Message(city_info, justify=LEFT, textvariable=self._city_name, font="Verdana 20 bold", width=300)
-        city_name.grid(pady=20, columnspan=2)
+        city_name = Message(self.city_info, justify=LEFT, textvariable=self._city_name, font="Verdana 20 bold", width=300)
+        city_name.grid(pady=20, columnspan=2, sticky=W+E)
         city_info_list = [
             "Leader:",
             "Population:",
@@ -214,13 +223,33 @@ class Application():
         ]
         self.city_info_values = {}
         for n, label in enumerate(city_info_list):
-            self.city_info_values[label] = StringVar(city_info, "")
-            Label(city_info, justify=LEFT, text=label).grid(row=n+1, column=0, sticky=N+W, padx=10)
-            Message(city_info, justify=LEFT, textvariable=self.city_info_values[label], width=200).grid(row=n+1, column=1, sticky=N+W)
+            self.city_info_values[label] = StringVar(self.city_info, "")
+            Label(self.city_info, justify=LEFT, text=label).grid(row=n+1, column=0, sticky=W+E, padx=10)
+            Message(self.city_info, justify=LEFT, textvariable=self.city_info_values[label], width=200).grid(row=n+1, column=1, sticky=W+E)
+        Button(self.city_info, justify=LEFT, text="More", command=self._show_char_info).grid(row=1, column=2)
+        
+    def _show_char_info(self):
+        self.city_info.pack_forget()
+        self.emp_info.pack_forget()
+        try:
+            self.char_name.set(self.showing.leader.fullname)
+            self.char_age.set(self.showing.leader.age)
+        except:
+            self.char_name.set("No Leader")
+            self.char_age.set("")
+        self.char_info.pack(fill="both")
+    
+    def _char_info(self, desc):
+        self.char_info = Frame(desc, width=300, height=300, relief=RIDGE)
+        self.char_name = StringVar(self.char_info, "")
+        Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=W+E, columnspan=2)
+        self.char_age = IntVar(self.char_info, 0)
+        Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=W+E)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=200).grid(row=1, column=1, sticky=W+E)
+        
         
     def _emp_info(self, desc):
-        emp_info = Frame(desc, width=300, height=300)
-        emp_info.pack()
+        self.emp_info = Frame(desc, width=300, height=300)
         
         
     def _create_news_frame(self):
