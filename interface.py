@@ -51,30 +51,41 @@ class Application():
             for x, f in enumerate(row):
                 if self.show_terrain:
                     terrain_color = f.color()
+                    river_color = "blue"
                 else:
-                    if f.height <= 1:
-                        terrain_color = f.color()
-                    else:
-                        terrain_color = "white"
+                    #~ if f.height <= 1:
+                        #~ terrain_color = f.color()
+                    #else:
+                    greytone = (230-f.height)
+                    terrain_color = "#%02X%02X%02X" % (greytone, greytone, greytone)
+                    river_color = "white"
                 self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag="field")
+                if f.river is not None:
+                    for t in f.river:
+                        x1, y1, x2, y2 = t
+                        self.inner_map.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag="river")
+                        self.inner_map.create_line(x*size+size/2, y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
+                if f.lake:
+                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag="lake", outline="")
                 if self.mapmode != "t":
-                    if f.city is not None:
-                        if self.mapmode == "p": # political
-                            citycolor = f.owner.color
-                        elif self.mapmode == "c": # cultural
-                            if f.owner.culture is not None:
-                                citycolor = f.owner.culture.color
-                            else:
-                                citycolor = "white"
-                        self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
-                    elif f.owner is not None:
-                        if self.mapmode == "p": # political
-                            bordercolor = f.owner.color
-                        elif self.mapmode == "c": # cultural
-                            bordercolor = f.owner.culture.color
-                        self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
-                    elif f.owner is None:
-                        self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
+                    pass
+                    #~ if f.city is not None:
+                        #~ if self.mapmode == "p": # political
+                            #~ citycolor = f.owner.color
+                        #~ elif self.mapmode == "c": # cultural
+                            #~ if f.owner.culture is not None:
+                                #~ citycolor = f.owner.culture.color
+                            #~ else:
+                                #~ citycolor = "white"
+                        #~ self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
+                    #~ elif f.owner is not None:
+                        #~ if self.mapmode == "p": # political
+                            #~ bordercolor = f.owner.color
+                        #~ elif self.mapmode == "c": # cultural
+                            #~ bordercolor = f.owner.culture.color
+                        #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
+                    #~ elif f.owner is None:
+                        #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
         self.inner_map.bind("<Button-1>", self._get_field)
         self.inner_map.pack()
         
@@ -87,6 +98,7 @@ class Application():
         ypos = int(y/size)
         # Show all the stuff in the right hand side bar :D
         f = self.fields[ypos][xpos]
+        print(f.exact_height)
         # Set the StringVars for Field Info
         self.field_info_values["FIELD ID:"].set(str(f.fieldID))
         terrain_types = {

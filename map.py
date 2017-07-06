@@ -12,18 +12,10 @@ from tkinter import *
 class SimMap(object):
     
     def __init__(self, width, height):
-        self.reach_limit = 10
-        self.terrain_change_rate = 0.5
-        self.ocean_chance = 1
-        self.coastal_chance = 3
-        self.lowlands_chance = 4
-        self.woodlands_chance = 4
-        self.highlands_chance = 4
-        self.lower_m_chance = 2
-        self.higher_m_chance = 1
+        self.reach_limit = 15
+        self.terrain_change_rate = 8
         self.height = height
         self.width = width
-        self.city_generation_chance = 0.15
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
         self.ressourceList()
         self.cities = []
@@ -40,16 +32,16 @@ class SimMap(object):
             
             
     def fillfield(self):
-        self.terrain_chances = Counter({
-            0:self.ocean_chance,
-            1:self.coastal_chance,
-            2:self.lowlands_chance,
-            3:self.woodlands_chance,
-            4:self.highlands_chance,
-            5:self.lower_m_chance,
-            6:self.higher_m_chance
-        })
-        self.sorted_terrain_chances = sorted(list(self.terrain_chances.elements()))
+        #~ self.terrain_chances = Counter({
+            #~ 0:self.ocean_chance,
+            #~ 1:self.coastal_chance,
+            #~ 2:self.lowlands_chance,
+            #~ 3:self.woodlands_chance,
+            #~ 4:self.highlands_chance,
+            #~ 5:self.lower_m_chance,
+            #~ 6:self.higher_m_chance
+        #~ })
+        #~ self.sorted_terrain_chances = sorted(list(self.terrain_chances.elements()))
         self.fieldIDs = {}
         self.fieldIDcounter = 1
         for x in range(self.height):
@@ -59,16 +51,192 @@ class SimMap(object):
                 self.fields[x][y] = newField
                 self.fieldIDcounter += 1
         
+        # fill the "ocean" fields (10th of the map all around the corner)
+        self._create_ocean()
+        self.mountain_fields = []
+        
         shuffled_IDs = list(range(1, self.fieldIDcounter))
         random.shuffle(shuffled_IDs)
         for fieldID in shuffled_IDs:
-            self.setlevel(self.fieldIDs[fieldID])
-            self._createCity(self.fieldIDs[fieldID])
-            self._createRessources(self.fieldIDs[fieldID])
-        for c in self.cities:
-            c.detect_ressources()
-            c.calculate_values()
-            c.calculate_growth()
+            if self.fieldIDs[fieldID].height is None:
+                self.setlevel(self.fieldIDs[fieldID])
+                
+        self._create_rivers()
+        
+            #~ self._createCity(self.fieldIDs[fieldID])
+            #~ self._createRessources(self.fieldIDs[fieldID])
+        #~ for c in self.cities:
+            #~ c.detect_ressources()
+            #~ c.calculate_values()
+            #~ c.calculate_growth()
+            
+    def _create_rivers(self):
+        num_of_rivers = round((self.width*self.height)/200)
+        for i in range(num_of_rivers):
+            start = random.choice(self.mountain_fields)
+            last = None
+            curr_fields = []
+            correct_start = True
+            for n in start.field_neighbor(1):
+                if n.river is not None:
+                    correct_start = False
+                    break
+            if not correct_start:
+                i -= 1
+                continue
+            while True:
+                possibles = []
+                for n in start.field_neighbor(1):
+                    if n.exact_height < start.exact_height:
+                        possibles.append(n)
+                if len(possibles) == 0 or start.exact_height < 100:
+                    if start.height < 100:
+                        start.river = [(last.x, last.y, start.x, start.y)]
+                        print("SUCCESS")
+                        break
+                    else:
+                        # make lake
+                        start.lake = True
+                        # continue river
+                        choices = start.field_neighbor(1)
+                        #print(possibles)
+                        #~ if last is not None:
+                            #~ possibles.remove(last)
+                        #print(possibles)
+                        #~ print(choices)
+                        #~ print(curr_fields)
+                        for c in choices.copy():
+                            #~ print(c)
+                            if c.fieldID in curr_fields:
+                                #~ print(c)
+                                choices.remove(c)
+                        #~ print(choices)
+                        try:
+                            lowest = min(choices, key=lambda x: x.exact_height)
+                        except:
+                            if last is not None:
+                                start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                            else:
+                                start.river = [(start.x, start.y, lowest.x, lowest.y)]
+                            start.lake = True
+                            break
+                        print("LAKE")
+                        if last is not None:
+                            start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                        else:
+                            start.river = [(start.x, start.y, lowest.x, lowest.y)]
+                        if start.fieldID not in curr_fields:
+                            curr_fields.append(start.fieldID)
+                        if lowest.river is not None:
+                            lowest.river.append((start.x, start.y, lowest.x, lowest.y))
+                            print("STOP")
+                            break
+                        last = start
+                        start = lowest
+                else:
+                    choices = start.field_neighbor(1)
+                    #~ if last is not None:
+                        #~ choices.remove(last)
+                    #~ print(choices)
+                    #~ print(curr_fields)
+                    for c in choices.copy():
+                        #~ print(c)
+                        with_rivers = 0
+                        for n in c.field_neighbor(1):
+                            if n.fieldID in curr_fields:
+                                with_rivers += 1
+                        if with_rivers >= 1:
+                            choices.remove(c)
+                        elif c.fieldID in curr_fields:
+                            #~ print(c)
+                            choices.remove(c)
+                    #~ print(choices)
+                    try:
+                        lowest = min(choices, key=lambda x: x.exact_height)
+                    except:
+                        if last is not None:
+                            start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                        else:
+                            start.river = [(start.x, start.y, lowest.x, lowest.y)]
+                        start.lake = True
+                        break
+                    print("APPENDING")
+                    if last is not None:
+                        start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                    else:
+                        start.river = [(start.x, start.y, lowest.x, lowest.y)]
+                    curr_fields.append(start.fieldID)
+                    if lowest.river is not None:
+                        lowest.river.append((start.x, start.y, lowest.x, lowest.y))
+                        print("STOP")
+                        break
+                        
+                    last = start
+                    start = lowest
+                        
+    #~ def _create_rivers(self):
+        #~ num_of_rivers = round((self.width*self.height)/20)
+        #~ for i in range(num_of_rivers):
+            #~ start = random.choice(self.ocean_fields)
+            #~ last = None
+            #~ len_river = 0
+            #~ print("Trying to create river!")
+            #~ while True:
+                #~ possibles = []
+                #~ for n in start.field_neighbor(1):
+                    #~ if n.height > start.height:
+                        #~ possibles.append(n)
+                #~ if len(possibles) == 0:
+                    #~ if start.height >= 100:
+                        #~ # Successful
+                        #~ start.river = (last.x, last.y, start.x, start.y)
+                        #~ print("SUCCESS")
+                        #~ break
+                    #~ else:
+                        #~ # Underwater, try again
+                        #~ i -= 1
+                        #~ print("FAIL")
+                        #~ break
+                #~ else:
+                    #~ print("Appending field!")
+
+                    #~ next_choice = random.choice(possibles)
+                    #~ # ASSIGN RIVER
+                    #~ if start.exact_height >= 100:
+                        #~ start.river = (last.x, last.y, next_choice.x, next_choice.y)
+                        #~ len_river += 1
+                    #~ if next_choice.river is not None:
+                        #~ break
+                    #~ last = start
+                    #~ start = next_choice
+                
+            
+    def _create_ocean(self):
+        self.ocean_fields = []
+        
+        distance = round(self.width/60)
+        for n in range(distance):
+            to_oceanize = self.fields[n]
+            for col in to_oceanize:
+                col.height = random.randint(0, 49)
+                col.exact_height = random.randint(0, 49)
+                self.ocean_fields.append(col)
+            to_oceanize = self.fields[-n+1]
+            for col in to_oceanize:
+                col.height = random.randint(0, 49)
+                col.exact_height = random.randint(0, 49)
+                self.ocean_fields.append(col)
+        
+        for row in self.fields:
+            for m in range(distance):
+                col = row[n]
+                col.height = random.randint(0, 49)
+                col.exact_height = random.randint(0, 49)
+                self.ocean_fields.append(col)
+                col = row[-n+1]
+                col.height = random.randint(0, 49)
+                col.exact_height = random.randint(0, 49)
+                self.ocean_fields.append(col)
                 
                 
     def _createCity(self, field):
@@ -203,8 +371,7 @@ class SimMap(object):
     def setlevel(self, field):
         # No level system anymore as user can input probabilities for
         # terrain_types himself
-        terrain_chances = self.sorted_terrain_chances
-        
+        #terrain_chances = self.sorted_terrain_chances
         total = 0
         found_valids = 0
         reach = 1
@@ -218,52 +385,24 @@ class SimMap(object):
                 if n.exact_height is not None:
                     total += n.exact_height
                     found_valids += 1
+            true_change_rate = reach*self.terrain_change_rate
             reach += 1 # search further
         if found_valids == 0:
-            final = random.randint(0,len(terrain_chances)-1)
+            final = random.randint(90,189)
         else:
             mean = (total/found_valids)
-            final = mean + random.uniform(-self.terrain_change_rate, self.terrain_change_rate)
-            if final > len(terrain_chances)-1:
-                final = len(terrain_chances)-1
+            final = mean + random.uniform(-true_change_rate, true_change_rate)
+            if final > 199:
+                final = 199
             elif final < 0:
                 final = 0
         field.exact_height = float(final)
         final = int(final) # round down
-        field.height = terrain_chances[final]
-        
-    def _draw_map(self, canvas_stat):
-        self.canvas_width = canvas_stat
-        self.canvas_height = canvas_stat
-        if self.game_map is not None:
-            self.game_map.destroy()
-        self.game_window = Canvas(self.root, borderwidth=0, width=1500, height=800)
-        self.game_map = Frame(self.game_window)
-        self.vsb = Scrollbar(self.root, orient="vertical", command=self.game_window.yview)
-        self.hsb = Scrollbar(self.root, orient="horizontal", command=self.game_window.xview)
-        self.game_window.configure(yscrollcommand=self.vsb.set)
-        self.game_window.configure(xscrollcommand=self.hsb.set)
-        self.game_window.grid(row=0, column=0)
-        self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
-        self.game_map.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(self.game_window))
-        frame = self.game_map
-        self.canvas_fields = {}
-        for x in range(len(self.fields)):
-            for y in range(len(self.fields[x])):
-                #f = Button(self.root, text=str(x)+str(y), command=self.show_field).grid(row=x, column=y)
-                f = Canvas(frame, width=self.canvas_width, height=self.canvas_height)
-                f.bind("<Button-1>", lambda event, field=self.fields[x][y]: self._field_info(field))
-                f.grid(row=x, column=y, padx=0, pady=0, ipadx=0, ipady=0)
-                #enter color
-                color = self.fields[x][y].color()
-                f.configure(background=color, highlightthickness=0)
-                #f.create_text(canvas_width/2, canvas_height/2, text=str(x)+str(y))
-                self.canvas_fields[self.fields[x][y].fieldID] = f
-                if self.fields[x][y].city is not None:
-                    self._draw_city(f, self.fields[x][y].city, self.canvas_width, self.canvas_height)
-                elif self.fields[x][y].owner is not None:
-                    f.create_rectangle(1, 1, self.canvas_width-2, self.canvas_height-2, outline=self.fields[x][y].owner.color)
-        
+        field.height = final
+        if field.height < 100:
+            self.ocean_fields.append(field)
+        elif field.height > 169:
+            self.mountain_fields.append(field)
                 
     def create_tkinter(self):
         self.interface = Application(self, self.fields)
@@ -336,6 +475,8 @@ class Field(object):
         self.ressource = None
         self.simMap = simMap
         self.owner = None # City
+        self.river = None
+        self.lake = False
         
     def __str__(self):
         if self.height == 0:
@@ -353,7 +494,10 @@ class Field(object):
         else:
             sign = "^"
         toPrint = """%s""" % (sign)
-        return toPrint
+        return str(self.fieldID)
+        
+    def __repr__(self):
+        return str(self.fieldID)
         
     def _neighbors(self):
         """This method is still in use on one field, but is subject to 
@@ -402,17 +546,17 @@ class Field(object):
             
         
     def color(self):
-        if self.height == 0:
+        if self.height < 80:
             clr = "navy"
-        elif self.height == 1:
+        elif self.height < 100:
             clr = "blue"
-        elif self.height == 2:
+        elif self.height < 120:
             clr = "PaleGreen2"
-        elif self.height == 3:
+        elif self.height < 170:
             clr = "green"
-        elif self.height == 4:
+        elif self.height < 190:
             clr = "orange"
-        elif self.height == 5:
+        elif self.height < 195:
             clr = "brown"
         else:
             clr = "gray60"
