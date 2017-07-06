@@ -4,7 +4,7 @@ MittSim is a python script to randomly generate maps
 
 THIS BRANCH IS WIP, AS LONG AS IT'S WIP, START GAME LIKE THIS:
 ```
-~$ python3 Startup.py
+~$ python3 map.py
 ```
 
 ONLY MAP GENERATION WILL WORK, NO CITIES WILL SPAWN!
