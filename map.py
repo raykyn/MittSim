@@ -87,7 +87,7 @@ class SimMap(object):
             while True:
                 possibles = []
                 for n in start.field_neighbor(1):
-                    if n.exact_height < start.exact_height:
+                    if n.exact_height < start.exact_height+self.terrain_change_rate/2:
                         possibles.append(n)
                 if len(possibles) == 0 or start.exact_height < 100:
                     if start.height < 100:

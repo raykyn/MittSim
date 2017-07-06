@@ -170,7 +170,7 @@ class Culture(object):
 def main():
     init = start_Cultures()
     init.load_all()
-    culture = Culture()
+    culture = Culture("blue")
     #print(culture.generate_name(init, "german", "m"))
     for i in range(0,10):
         name = culture.generate_name(init, "t") 
