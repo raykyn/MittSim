@@ -23,12 +23,6 @@ class SimMap(object):
         self.culture_models = start_Cultures()
         self.culture_models.load_all()
         self.game_map = None
-
-    def printfield(self):
-        for x in range(len(self.fields)):
-            for y in range(len(self.fields[x])):
-                print(self.fields[x][y], end=' ')
-            print()
             
             
     def fillfield(self):
@@ -71,144 +65,98 @@ class SimMap(object):
             #~ c.calculate_growth()
             
     def _create_rivers(self):
-        num_of_rivers = round((self.width*self.height)/200)
+        #num_of_rivers = round((self.width*self.height)/200)
+        num_of_rivers = 80
         for i in range(num_of_rivers):
-            start = random.choice(self.mountain_fields)
-            last = None
-            curr_fields = []
-            correct_start = True
-            for n in start.field_neighbor(1):
-                if n.river is not None:
-                    correct_start = False
-                    break
-            if not correct_start:
-                i -= 1
-                continue
-            while True:
-                possibles = []
-                for n in start.field_neighbor(1):
-                    if n.exact_height < start.exact_height+self.terrain_change_rate/2:
-                        possibles.append(n)
-                if len(possibles) == 0 or start.exact_height < 100:
-                    if start.height < 100:
-                        start.river = [(last.x, last.y, start.x, start.y)]
-                        print("SUCCESS")
+            success = False
+            while not success:
+                curr = random.choice(self.mountain_fields)
+                last = None
+                path = [curr]
+                dead_ends = []
+                correct_start = True
+                success = True
+                for n in curr.field_neighbor(1):
+                    if len(n.river) > 0:
+                        correct_start = False
                         break
-                    else:
-                        # make lake
-                        start.lake = True
-                        # continue river
-                        choices = start.field_neighbor(1)
-                        #print(possibles)
-                        #~ if last is not None:
-                            #~ possibles.remove(last)
-                        #print(possibles)
-                        #~ print(choices)
-                        #~ print(curr_fields)
-                        for c in choices.copy():
-                            #~ print(c)
-                            if c.fieldID in curr_fields:
-                                #~ print(c)
-                                choices.remove(c)
-                        #~ print(choices)
-                        try:
-                            lowest = min(choices, key=lambda x: x.exact_height)
-                        except:
-                            if last is not None:
-                                start.river = [(last.x, last.y, lowest.x, lowest.y)]
-                            else:
-                                start.river = [(start.x, start.y, lowest.x, lowest.y)]
-                            start.lake = True
-                            break
-                        print("LAKE")
-                        if last is not None:
-                            start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                if not correct_start:
+                    success = False
+                    continue
+                while curr.height >= 100 and len(curr.river) == 0:
+                    possibles = []
+                    #print("curr = {}".format(curr.fieldID))
+                    for n in curr.field_neighbor(1):
+                        #print(n.fieldID)
+                        lake = False
+                        if last is None and n.exact_height >= curr.exact_height:
+                            #print("STARTERROR")
+                            continue
+                        elif n.exact_height < curr.exact_height:
+                            pass
+                        elif n.exact_height < last.exact_height:
+                            lake = True
                         else:
-                            start.river = [(start.x, start.y, lowest.x, lowest.y)]
-                        if start.fieldID not in curr_fields:
-                            curr_fields.append(start.fieldID)
-                        if lowest.river is not None:
-                            lowest.river.append((start.x, start.y, lowest.x, lowest.y))
-                            print("STOP")
-                            break
-                        last = start
-                        start = lowest
-                else:
-                    choices = start.field_neighbor(1)
-                    #~ if last is not None:
-                        #~ choices.remove(last)
-                    #~ print(choices)
-                    #~ print(curr_fields)
-                    for c in choices.copy():
-                        #~ print(c)
-                        with_rivers = 0
-                        for n in c.field_neighbor(1):
-                            if n.fieldID in curr_fields:
-                                with_rivers += 1
-                        if with_rivers >= 1:
-                            choices.remove(c)
-                        elif c.fieldID in curr_fields:
-                            #~ print(c)
-                            choices.remove(c)
-                    #~ print(choices)
-                    try:
-                        lowest = min(choices, key=lambda x: x.exact_height)
-                    except:
-                        if last is not None:
-                            start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                            continue
+                        if n in path or n in dead_ends:
+                            continue
                         else:
-                            start.river = [(start.x, start.y, lowest.x, lowest.y)]
-                        start.lake = True
-                        break
-                    print("APPENDING")
-                    if last is not None:
-                        start.river = [(last.x, last.y, lowest.x, lowest.y)]
+                            pass
+                        good = True
+                        #~ for i in n.field_neighbor(1):
+                            #~ if i is curr:
+                                #~ continue
+                            #~ elif i in path:
+                                #~ good = False
+                                #~ break
+                        if good:
+                            #if lake:
+                                #print("LAKE APPENDED")
+                            #else:
+                                #print("NORMAL APPENDED")
+                            possibles.append((n, lake)) # Woohoo!
+                    if len(possibles) > 0:
+                        #print("APPENDED FOUND")
+                        p_fields_no_lake = [p[0] for p in possibles if not p[1]]
+                        p_fields_w_lake = [p[0] for p in possibles if p[1]]
+                        if len(p_fields_no_lake) > 0:
+                            #print("NORMAL FOUND")
+                            next_f = random.choice(p_fields_no_lake)
+                            curr.lake = False
+                        else:
+                            #print("LAKE FOUND")
+                            next_f = min(p_fields_w_lake, key=lambda x: x.exact_height)
+                            dead_ends.extend([p for p in p_fields_w_lake if p != next_f])
+                            curr.lake = True
+                        path.append(next_f)
+                        last = curr
+                        curr = next_f
                     else:
-                        start.river = [(start.x, start.y, lowest.x, lowest.y)]
-                    curr_fields.append(start.fieldID)
-                    if lowest.river is not None:
-                        lowest.river.append((start.x, start.y, lowest.x, lowest.y))
-                        print("STOP")
-                        break
-                        
-                    last = start
-                    start = lowest
-                        
-    #~ def _create_rivers(self):
-        #~ num_of_rivers = round((self.width*self.height)/20)
-        #~ for i in range(num_of_rivers):
-            #~ start = random.choice(self.ocean_fields)
-            #~ last = None
-            #~ len_river = 0
-            #~ print("Trying to create river!")
-            #~ while True:
-                #~ possibles = []
-                #~ for n in start.field_neighbor(1):
-                    #~ if n.height > start.height:
-                        #~ possibles.append(n)
-                #~ if len(possibles) == 0:
-                    #~ if start.height >= 100:
-                        #~ # Successful
-                        #~ start.river = (last.x, last.y, start.x, start.y)
-                        #~ print("SUCCESS")
-                        #~ break
-                    #~ else:
-                        #~ # Underwater, try again
-                        #~ i -= 1
-                        #~ print("FAIL")
-                        #~ break
-                #~ else:
-                    #~ print("Appending field!")
-
-                    #~ next_choice = random.choice(possibles)
-                    #~ # ASSIGN RIVER
-                    #~ if start.exact_height >= 100:
-                        #~ start.river = (last.x, last.y, next_choice.x, next_choice.y)
-                        #~ len_river += 1
-                    #~ if next_choice.river is not None:
-                        #~ break
-                    #~ last = start
-                    #~ start = next_choice
+                        #print("NO APPENDED FOUND")
+                        curr.lake = False
+                        if path.index(curr)-2 >= 0:
+                            last = path[path.index(curr)-2]
+                        else:
+                            last = None
+                        if path.index(curr)-1 >= 0:
+                            old = curr
+                            curr = path[path.index(curr)-1]
+                        else:
+                            #print("ABORT")
+                            success = False
+                            break
+                        path.remove(old)
+                        dead_ends.append(old)
+                
+                if success:
+                    #print("SUCCESS")
+                    for i, f in enumerate(path):
+                        if i == 0:
+                            f.river.append((f.x, f.y, path[i+1].x, path[i+1].y))
+                        elif i == len(path)-1:
+                            f.river.append((path[i-1].x, path[i-1].y, f.x, f.y))
+                        else:
+                            f.river.append((path[i-1].x, path[i-1].y, path[i+1].x, path[i+1].y))
                 
             
     def _create_ocean(self):
@@ -475,7 +423,7 @@ class Field(object):
         self.ressource = None
         self.simMap = simMap
         self.owner = None # City
-        self.river = None
+        self.river = []
         self.lake = False
         
     def __str__(self):
@@ -493,7 +441,7 @@ class Field(object):
             sign = "+"
         else:
             sign = "^"
-        toPrint = """%s""" % (sign)
+        to#print = """%s""" % (sign)
         return str(self.fieldID)
         
     def __repr__(self):
