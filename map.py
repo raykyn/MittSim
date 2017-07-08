@@ -16,6 +16,7 @@ class SimMap(object):
         self.terrain_change_rate = 8
         self.height = height
         self.width = width
+        self.sealevel = 75
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
         self.ressourceList()
         self.cities = []
@@ -83,7 +84,7 @@ class SimMap(object):
                 if not correct_start:
                     success = False
                     continue
-                while curr.height >= 100 and len(curr.river) == 0:
+                while curr.height >= self.sealevel and len(curr.river) == 0:
                     possibles = []
                     #print("curr = {}".format(curr.fieldID))
                     for n in curr.field_neighbor(1):
@@ -336,7 +337,7 @@ class SimMap(object):
             true_change_rate = reach*self.terrain_change_rate
             reach += 1 # search further
         if found_valids == 0:
-            final = random.randint(90,189)
+            final = random.randint(self.sealevel-10,189)
         else:
             mean = (total/found_valids)
             final = mean + random.uniform(-true_change_rate, true_change_rate)
@@ -347,7 +348,7 @@ class SimMap(object):
         field.exact_height = float(final)
         final = int(final) # round down
         field.height = final
-        if field.height < 100:
+        if field.height < self.sealevel:
             self.ocean_fields.append(field)
         elif field.height > 169:
             self.mountain_fields.append(field)
@@ -494,9 +495,9 @@ class Field(object):
             
         
     def color(self):
-        if self.height < 80:
+        if self.height < self.simMap.sealevel-20:
             clr = "navy"
-        elif self.height < 100:
+        elif self.height < self.simMap.sealevel:
             clr = "blue"
         elif self.height < 120:
             clr = "PaleGreen2"

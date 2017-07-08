@@ -24,6 +24,9 @@ class Application():
         self.showing_city = None # The currently shown city
         # Initialize everything
         self.root = Tk()
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+        self.root.geometry(str(self.screen_width) + "x" + str(self.screen_height))
         self.root.title("MyLittleFantasySimulator")
         self._create_menu()
         self._create_game_map_frame()
@@ -176,7 +179,7 @@ class Application():
     
         
     def _create_game_map_frame(self):
-        self.game_window = Canvas(self.root, borderwidth=0, width=1500, height=800)
+        self.game_window = Canvas(self.root, borderwidth=0, width=self.screen_width*0.8, height=self.screen_height*0.8)
         self.game_map = Frame(self.game_window)
         self.game_window.grid(row=0, column=0)
         self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
@@ -195,7 +198,7 @@ class Application():
         self.hsb.grid(row=1,column=0, sticky=W+S+E)
         
     def _create_description_frame(self):
-        desc = Frame(self.root, width=300, height=800)
+        desc = Frame(self.root)
         desc.grid(row=0, column=2)
         # 3 frames packed below that:
         # Field-Info, City-Info, Empire-Info
@@ -205,7 +208,7 @@ class Application():
         self._emp_info(desc)
         
     def _field_info(self, desc):
-        field_info = Frame(desc, width=300, height=200, relief=RIDGE)
+        field_info = Frame(desc, relief=RIDGE)
         field_info.pack(fill="both")
         field_info_list = [
             "FIELD ID:",
@@ -219,7 +222,7 @@ class Application():
             Label(field_info, justify=LEFT, textvariable=self.field_info_values[label]).grid(row=n, column=1, sticky=N+W)
         
     def _city_info(self, desc):
-        self.city_info = Frame(desc, width=300, height=300, relief=RIDGE)
+        self.city_info = Frame(desc, relief=RIDGE)
         #self.city_info.pack(fill="both")
         self._city_name = StringVar(desc, "")
         city_name = Message(self.city_info, justify=LEFT, textvariable=self._city_name, font="Verdana 20 bold", width=300)
@@ -252,7 +255,7 @@ class Application():
         self.char_info.pack(fill="both")
     
     def _char_info(self, desc):
-        self.char_info = Frame(desc, width=300, height=300, relief=RIDGE)
+        self.char_info = Frame(desc, relief=RIDGE)
         self.char_name = StringVar(self.char_info, "")
         Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=W+E, columnspan=2)
         self.char_age = IntVar(self.char_info, 0)
@@ -261,18 +264,18 @@ class Application():
         
         
     def _emp_info(self, desc):
-        self.emp_info = Frame(desc, width=300, height=300)
+        self.emp_info = Frame(desc)
         
         
     def _create_news_frame(self):
-        news_frame = Frame(self.root, width=1500, height=100)
+        news_frame = Frame(self.root)
         news_frame.grid(row=2, column=0)
         self._news = StringVar(news_frame, "No news yet")
         l = Label(news_frame, textvariable=self._news)
         l.grid(row=0, column=0)
         
     def _create_date_frame(self):
-        date_frame = Frame(self.root, width=300, height=100)
+        date_frame = Frame(self.root)
         date_frame.grid(row=2, column=2)
         self.date = Label(date_frame)
         self.date.grid(sticky=W+E, columnspan=4)
