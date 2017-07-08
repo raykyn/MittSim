@@ -44,11 +44,12 @@ class Application():
             self.inner_map.destroy()
         except:
             pass
-        frame = self.game_map
+        #frame = self.game_map
         size = self.field_size
         map_height = len(fields)*size
         map_width = len(fields[0])*size
-        self.inner_map = Canvas(frame, width=map_width, height=map_height)
+        #~ self.inner_map = Canvas(frame, width=map_width, height=map_height)
+        self.inner_map = self.game_window
         
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
@@ -89,10 +90,10 @@ class Application():
                         #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
                     #~ elif f.owner is None:
                         #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
-        self.inner_map.bind("<ButtonRelease-1>", self._get_field)
-        self.inner_map.bind("<Button-1>", self._scroll_start)
-        self.inner_map.bind("<B1-Motion>", self._scroll_move)
-        self.inner_map.pack()
+        #~ self.inner_map.bind("<ButtonRelease-1>", self._get_field)
+        #~ self.inner_map.bind("<Button-1>", self._scroll_start)
+        #~ self.inner_map.bind("<B1-Motion>", self._scroll_move)
+        #~ self.inner_map.pack()
         
     def _get_field(self, event):
         size = self.field_size
@@ -182,11 +183,43 @@ class Application():
         
     def _create_game_map_frame(self):
         self.game_window = Canvas(self.root, borderwidth=0, width=self.screen_width*0.8, height=self.screen_height*0.8)
-        self.game_map = Frame(self.game_window)
+        #self.game_map = Frame(self.game_window)
         self.game_window.grid(row=0, column=0)
-        self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
-        self.game_map.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(canvas))
+        #self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
+        self.game_window.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(canvas))
+        self.game_window.bind("<Button-1>", self._scroll_start)
+        self.game_window.bind("<B1-Motion>", self._scroll_move)
+        self.game_window.bind("<Button-4>", self.zoomerP)
+        self.game_window.bind("<Button-5>", self.zoomerM)
+        self.game_window.bind("<MouseWheel>",self.zoomer)
         
+    #windows zoom
+    def zoomer(self,event):
+        true_x = self.game_window.canvasx(event.x)
+        true_y = self.game_window.canvasy(event.y)
+        if (event.delta > 0):
+            self.game_window.scale("all", true_x, true_y, 1.1, 1.1)
+        elif (event.delta < 0):
+            self.game_window.scale("all", true_x, true_y, 0.9, 0.9)
+        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+
+    #linux zoom
+    def zoomerP(self,event):
+        true_x = self.game_window.canvasx(event.x)
+        true_y = self.game_window.canvasy(event.y)
+        self.game_window.scale("all", true_x, true_y, 1.1, 1.1)
+        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+    def zoomerM(self,event):
+        true_x = self.game_window.canvasx(event.x)
+        true_y = self.game_window.canvasy(event.y)
+        self.game_window.scale("all", true_x, true_y, 0.9, 0.9)
+        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+        
+    def _scroll_start(self, event):
+        self.game_window.scan_mark(event.x, event.y)
+
+    def _scroll_move(self, event):
+        self.game_window.scan_dragto(event.x, event.y, gain=1)
         
     def _scroll_start(self, event):
         self.inner_map.scan_mark(event.x, event.y)
