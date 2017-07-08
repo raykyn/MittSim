@@ -89,7 +89,9 @@ class Application():
                         #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
                     #~ elif f.owner is None:
                         #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
-        self.inner_map.bind("<Button-1>", self._get_field)
+        self.inner_map.bind("<ButtonRelease-1>", self._get_field)
+        self.inner_map.bind("<Button-1>", self._scroll_start)
+        self.inner_map.bind("<B1-Motion>", self._scroll_move)
         self.inner_map.pack()
         
     def _get_field(self, event):
@@ -185,6 +187,13 @@ class Application():
         self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
         self.game_map.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(canvas))
         
+        
+    def _scroll_start(self, event):
+        self.inner_map.scan_mark(event.x, event.y)
+
+    def _scroll_move(self, event):
+        self.inner_map.scan_dragto(event.x, event.y, gain=1)
+
     def _onFrameConfigure(self, canvas):
         '''Reset the scroll region to encompass the inner frame'''
         canvas.configure(scrollregion=canvas.bbox("all"))
