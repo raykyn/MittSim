@@ -41,7 +41,7 @@ class Application():
         
     def create_map(self, fields):
         try:
-            self.inner_map.destroy()
+            self.inner_map.delete("all")
         except:
             pass
         #frame = self.game_map
@@ -154,12 +154,12 @@ class Application():
         zoommenu = Menu(menu)
         mapmodes = Menu(menu)
         menu.add_cascade(label="Game", menu=filemenu)
-        menu.add_cascade(label="Zoom", menu=zoommenu)
+        #menu.add_cascade(label="Zoom", menu=zoommenu)
         menu.add_cascade(label="Mapmodes", menu=mapmodes)
         filemenu.add_command(label="Exit", command=self._leave)
-        zoommenu.add_command(label="All", command= lambda x=8: self._zoom(x))
-        zoommenu.add_command(label="Normal", command= lambda x=12: self._zoom(x))
-        zoommenu.add_command(label="Close", command= lambda x=16: self._zoom(x))
+        #~ zoommenu.add_command(label="All", command= lambda x=8: self._zoom(x))
+        #~ zoommenu.add_command(label="Normal", command= lambda x=12: self._zoom(x))
+        #~ zoommenu.add_command(label="Close", command= lambda x=16: self._zoom(x))
         mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
         mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
         mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))
