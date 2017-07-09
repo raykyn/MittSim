@@ -13,12 +13,14 @@ class SimMap(object):
     
     def __init__(self, width, height):
         self.reach_limit = 15
-        self.terrain_change_rate = 8
+        self.terrain_change_rate = 6
         self.height = height
         self.width = width
         self.sealevel = 75
+        self.h_mountains = 190
+        self.l_mountains = 170
+        self.midlands = 120
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
-        self.ressourceList()
         self.cities = []
         # generate culture data
         self.culture_models = start_Cultures()
@@ -58,12 +60,55 @@ class SimMap(object):
                 
         self._create_rivers()
         
+        shuffled_IDs = list(range(1, self.fieldIDcounter))
+        random.shuffle(shuffled_IDs)
+        for fieldID in shuffled_IDs:
+            if self.fieldIDs[fieldID].terrain is None:
+                self._set_terrain(self.fieldIDs[fieldID])
+        
             #~ self._createCity(self.fieldIDs[fieldID])
             #~ self._createRessources(self.fieldIDs[fieldID])
         #~ for c in self.cities:
             #~ c.detect_ressources()
             #~ c.calculate_values()
             #~ c.calculate_growth()
+        
+    
+    def _set_terrain(self, f):
+        """
+        Terrain Types:
+        - High Mountains always count as Desert
+        - Lower Mountains always count as Steppe
+        - Grasslands (Steppe/Savanna/Tundra)
+        - Woodlands (or Jungle, in case of southern region or Taiga for northern)
+        - Deserts (Cold, hot, arid)
+        - Swamps and Wetlands
+        Similar to setlevel. This method chooses a random field. 
+        Factors to decide Terrain Type:
+        - Height (Only for mountains, swamps and wetlands)
+        - Position (Northern, middle, southern region)
+        - Neighbors (Same algorithm as height creation?)
+        - Rivers and Lakes (Wetland instead of desert if river)
+        """
+        if f.height >= self.h_mountains:
+            f.terrain = "High Mountains"
+        elif f.height >= self.l_mountains:
+            f.terrain = "Low Mountains"
+        elif f.height >= self.sealevel:
+            chance_list = ["Grassland"] * 5 + ["Woodland"] * 5 + ["Desert"] * 1
+            if len(f.river) > 0:
+                chance_list.extend(["Wetlands"]*10 + ["Swamps"]*2)
+                chance_list.remove("Desert")
+            for n in f.field_neighbor(1):
+                if len(n.river) > 0:
+                    chance_list.extend(["Wetlands"]*2 + ["Swamps"]*1)
+                if n.terrain is not None and n.terrain != "Wetlands" and n.terrain != "Swamps":
+                    chance_list.extend([n.terrain]*10)
+            f.terrain = random.choice(chance_list)
+        else:
+            f.terrain = "Ocean"
+                    
+    
             
     def _create_rivers(self):
         #num_of_rivers = round((self.width*self.height)/200)
@@ -206,121 +251,9 @@ class SimMap(object):
             field.createCity(self, field.x, field.y)
         elif field.height == 6 and m <= city_gen*0.15:
             field.createCity(self, field.x, field.y)
-            
-    def ressourceList(self):
-        sea_ress = {
-            "fishes":10,
-            "whales":4,
-            "pearls":4,
-            "crabs":6
-        }
-        self.sea_ress = []
-        for key, value in sea_ress.items():
-            for i in range(0, value):
-                self.sea_ress.append(key)
-        coast_ress = {
-            "fishes":13,
-            "pearls":4,
-            "crabs":7
-        }
-        self.coast_ress = []
-        for key, value in coast_ress.items():
-            for i in range(0, value):
-                self.coast_ress.append(key)
-        low_ress = {
-            "horses":4,
-            "fruits":4,
-            "cotton":2,
-            "sugar":2,
-            "pasture":6,
-            "wheats":6
-        }
-        self.low_ress = []
-        for key, value in low_ress.items():
-            for i in range(0, value):
-                self.low_ress.append(key)
-        wood_ress = {
-            "game":4,
-            "fur":4,
-            "mushroom":1,
-            "silk":1,
-            "spices":1,
-            "fruits":3,
-            "pasture":3,
-            "wheats":3,
-            "woods":5
-        }
-        self.wood_ress = []
-        for key, value in wood_ress.items():
-            for i in range(0, value):
-                self.wood_ress.append(key)
-        high_ress = {
-            "pasture":4,
-            "game":4,
-            "wine":2,
-            "coal":3,
-            "iron":3,
-            "gold":1,
-            "gems":1,
-            "silver":1,
-            "copper":2,
-            "stone":3
-        }
-        self.high_ress = []
-        for key, value in high_ress.items():
-            for i in range(0, value):
-                self.high_ress.append(key)
-        low_m_ress = {
-            "iron":3,
-            "gold":2,
-            "pasture":4,
-            "game":2,
-            "wine":1,
-            "silver":2,
-            "gems":2,
-            "copper":3,
-            "stone":4,
-            "coal":1
-        }
-        self.low_m_ress = []
-        for key, value in low_m_ress.items():
-            for i in range(0, value):
-                self.low_m_ress.append(key)
-        high_m_ress = {
-            "iron":4,
-            "gold":4,
-            "silver":4,
-            "copper":4,
-            "gems":3,
-            "stone":5
-        }
-        self.high_m_ress = []
-        for key, value in high_m_ress.items():
-            for i in range(0, value):
-                self.high_m_ress.append(key)
-        self.ress_dict = {
-            0:self.sea_ress,
-            1:self.coast_ress,
-            2:self.low_ress,
-            3:self.wood_ress,
-            4:self.high_ress,
-            5:self.low_m_ress,
-            6:self.high_m_ress
-        }
-
-            
-    def _createRessources(self, field):
-        n = random.randint(0,3)
-        if n == 3:
-            m = random.randint(0,23)
-            ressource_list = self.ress_dict[field.height]
-            field.ressource = ressource_list[m]
         
         
     def setlevel(self, field):
-        # No level system anymore as user can input probabilities for
-        # terrain_types himself
-        #terrain_chances = self.sorted_terrain_chances
         total = 0
         found_valids = 0
         reach = 1
@@ -340,7 +273,12 @@ class SimMap(object):
             final = random.randint(self.sealevel-10,189)
         else:
             mean = (total/found_valids)
-            final = mean + random.uniform(-true_change_rate, true_change_rate)
+            if mean > 160:
+                final = mean + random.uniform(-true_change_rate*1.5, true_change_rate)
+            elif mean < 40:
+                final = mean + random.uniform(-true_change_rate, true_change_rate*1.5)
+            else:
+                final = mean + random.uniform(-true_change_rate, true_change_rate)
             if final > 199:
                 final = 199
             elif final < 0:
@@ -426,6 +364,7 @@ class Field(object):
         self.owner = None # City
         self.river = []
         self.lake = False
+        self.terrain = None
         
     def __str__(self):
         if self.height == 0:
@@ -442,7 +381,7 @@ class Field(object):
             sign = "+"
         else:
             sign = "^"
-        to#print = """%s""" % (sign)
+        #print = """%s""" % (sign)
         return str(self.fieldID)
         
     def __repr__(self):
@@ -495,17 +434,19 @@ class Field(object):
             
         
     def color(self):
+        # PLACEHOLDERS
+        # THIS WILL INSTEAD REFER TO THE TERRAIN TYPE
         if self.height < self.simMap.sealevel-20:
             clr = "navy"
         elif self.height < self.simMap.sealevel:
             clr = "blue"
         elif self.height < 120:
             clr = "PaleGreen2"
-        elif self.height < 170:
+        elif self.height < 160:
             clr = "green"
-        elif self.height < 190:
+        elif self.height < 180:
             clr = "orange"
-        elif self.height < 195:
+        elif self.height < 190:
             clr = "brown"
         else:
             clr = "gray60"

@@ -57,12 +57,21 @@ class Application():
                     terrain_color = f.color()
                     river_color = "blue"
                 else:
-                    #~ if f.height <= 1:
-                        #~ terrain_color = f.color()
-                    #else:
                     greytone = (230-f.height)
                     terrain_color = "#%02X%02X%02X" % (greytone, greytone, greytone)
                     river_color = "white"
+                if self.mapmode == "terrains":
+                    terrain_colors = {
+                        "High Mountains":"gray60",
+                        "Low Mountains":"brown",
+                        "Grassland":"PaleGreen2",
+                        "Woodland":"forest green",
+                        "Desert":"yellow",
+                        "Wetlands":"turquoise",
+                        "Swamps":"olive drab",
+                        "Ocean":"navy"
+                    }
+                    terrain_color = terrain_colors[f.terrain]
                 self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag="field")
                 if f.river is not None:
                     for t in f.river:
@@ -154,20 +163,18 @@ class Application():
         zoommenu = Menu(menu)
         mapmodes = Menu(menu)
         menu.add_cascade(label="Game", menu=filemenu)
-        #menu.add_cascade(label="Zoom", menu=zoommenu)
         menu.add_cascade(label="Mapmodes", menu=mapmodes)
         filemenu.add_command(label="Exit", command=self._leave)
-        #~ zoommenu.add_command(label="All", command= lambda x=8: self._zoom(x))
-        #~ zoommenu.add_command(label="Normal", command= lambda x=12: self._zoom(x))
-        #~ zoommenu.add_command(label="Close", command= lambda x=16: self._zoom(x))
+        filemenu.add_command(label="Export Map", command=self._export_map)
         mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
         mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
         mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))
         mapmodes.add_command(label="Toggle Terrain", command=self._toggle_terrain)
+        mapmodes.add_command(label="Terrains", command= lambda x="terrains": self._change_mapmode(x))
         
-    def _zoom(self, size):
-        self.field_size = size
-        self.create_map(self.fields)
+    def _export_map(self):
+        self.inner_map.update()
+        self.inner_map.postscript(file="exported_map.ps", colormode="color")
         
     def _change_mapmode(self, mode):
         self.mapmode = mode
