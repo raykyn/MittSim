@@ -53,31 +53,40 @@ class Application():
         
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
-                if self.show_terrain:
-                    terrain_color = f.color()
-                    river_color = "blue"
-                else:
+                # Needs to be reimplemented
+                if self.mapmode == "Heightmap":
                     greytone = (230-f.height)
                     terrain_color = "#%02X%02X%02X" % (greytone, greytone, greytone)
                     river_color = "white"
-                if self.mapmode == "terrains":
+                if self.show_terrain:
                     terrain_colors = {
                         "High Mountains":"gray60",
                         "Low Mountains":"brown",
                         "Grassland":"PaleGreen2",
                         "Woodland":"forest green",
-                        "Desert":"yellow",
+                        "Desert":"khaki",
                         "Wetlands":"turquoise",
                         "Swamps":"olive drab",
+                        "Steppe":"yellow green",
                         "Ocean":"navy"
                     }
                     terrain_color = terrain_colors[f.terrain]
+                    river_color = "blue"
+                else:
+                    if f.terrain != "Ocean":
+                        terrain_color = "white"
+                    else:
+                        terrain_color = "navy"
+                    river_color = "blue"
                 self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag="field")
+                if (self.show_terrain or self.mapmode == "terrains") and f.hill:
+                    self.inner_map.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black")
+                    self.inner_map.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black")
                 if f.river is not None:
                     for t in f.river:
                         x1, y1, x2, y2 = t
                         self.inner_map.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag="river")
-                        self.inner_map.create_line(x*size+size/2, y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
+                        self.inner_map.create_line(x*size+(size/2), y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
                 if f.lake:
                     self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag="lake", outline="")
                 if self.mapmode != "t":
@@ -164,8 +173,8 @@ class Application():
         mapmodes = Menu(menu)
         menu.add_cascade(label="Game", menu=filemenu)
         menu.add_cascade(label="Mapmodes", menu=mapmodes)
-        filemenu.add_command(label="Exit", command=self._leave)
         filemenu.add_command(label="Export Map", command=self._export_map)
+        filemenu.add_command(label="Exit", command=self._leave)
         mapmodes.add_command(label="Political", command= lambda x="p": self._change_mapmode(x))
         mapmodes.add_command(label="Cultures", command= lambda x="c": self._change_mapmode(x))
         mapmodes.add_command(label="Terrain Only", command= lambda x="t": self._change_mapmode(x))

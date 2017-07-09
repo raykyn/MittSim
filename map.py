@@ -19,6 +19,7 @@ class SimMap(object):
         self.sealevel = 75
         self.h_mountains = 190
         self.l_mountains = 170
+        self.hills = 150
         self.midlands = 120
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
         self.cities = []
@@ -74,7 +75,7 @@ class SimMap(object):
             #~ c.calculate_growth()
         
     
-    def _set_terrain(self, f):
+    def _set_terrain(self, field):
         """
         Terrain Types:
         - High Mountains always count as Desert
@@ -90,29 +91,57 @@ class SimMap(object):
         - Neighbors (Same algorithm as height creation?)
         - Rivers and Lakes (Wetland instead of desert if river)
         """
-        if f.height >= self.h_mountains:
-            f.terrain = "High Mountains"
-        elif f.height >= self.l_mountains:
-            f.terrain = "Low Mountains"
-        elif f.height >= self.sealevel:
-            chance_list = ["Grassland"] * 5 + ["Woodland"] * 5 + ["Desert"] * 1
-            if len(f.river) > 0:
-                chance_list.extend(["Wetlands"]*10 + ["Swamps"]*2)
-                chance_list.remove("Desert")
-            for n in f.field_neighbor(1):
-                if len(n.river) > 0:
-                    chance_list.extend(["Wetlands"]*2 + ["Swamps"]*1)
-                if n.terrain is not None and n.terrain != "Wetlands" and n.terrain != "Swamps":
-                    chance_list.extend([n.terrain]*10)
-            f.terrain = random.choice(chance_list)
+        if field.exact_height > self.hills:
+            field.hill = True
+        if field.exact_height < self.sealevel:
+            field.terrain = "Ocean"
+            return None
+        elif field.exact_height > self.h_mountains:
+            field.terrain = "High Mountains"
+            return None
+        elif field.exact_height > self.l_mountains:
+            field.terrain = "Low Mountains"
+            return None
+        if len(field.river) == 0:
+            terrains = ["Desert"]*2 + ["Steppe"]*18 + ["Grassland"]*30 + ["Woodland"]*50
+        elif len(field.river) > 0:
+            terrains = ["Wetlands"]*50 + ["Swamps"]*5 + ["Grassland"]*30 + ["Woodland"]*15
+            for f in field.field_neighbor(1):
+                if f.exact_height < self.sealevel:
+                    terrains = ["Swamps"]*10 + ["Wetlands"]*90
+                    break
+        total = 0
+        found_valids = 0
+        reach = 1
+        while found_valids == 0 and reach <= self.reach_limit:
+            neighbors = field.field_neighbor(reach)
+            try:
+                neighbors = neighbors.remove(self)
+            except:
+                pass
+            for n in neighbors:
+                if n.humidity is not None:
+                    total += n.humidity
+                    found_valids += 1
+            true_change_rate = reach*self.terrain_change_rate
+            reach += 1 # search further
+        if found_valids == 0:
+            final = random.randint(0,99)
         else:
-            f.terrain = "Ocean"
-                    
+            mean = (total/found_valids)
+            final = mean + random.uniform(-true_change_rate, true_change_rate)
+            if final > 99:
+                final = 99
+            elif final < 0:
+                final = 0
+        field.humidity = float(final)
+        final = int(final) # round down
+        field.terrain = terrains[final]
     
             
     def _create_rivers(self):
-        #num_of_rivers = round((self.width*self.height)/200)
-        num_of_rivers = 80
+        num_of_rivers = round((self.width*self.height)/150)
+        #num_of_rivers = 80
         for i in range(num_of_rivers):
             success = False
             while not success:
@@ -288,7 +317,7 @@ class SimMap(object):
         field.height = final
         if field.height < self.sealevel:
             self.ocean_fields.append(field)
-        elif field.height > 169:
+        elif field.height >= self.hills:
             self.mountain_fields.append(field)
                 
     def create_tkinter(self):
@@ -365,6 +394,8 @@ class Field(object):
         self.river = []
         self.lake = False
         self.terrain = None
+        self.humidity = None
+        self.hill = False
         
     def __str__(self):
         if self.height == 0:
