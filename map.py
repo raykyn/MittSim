@@ -66,13 +66,57 @@ class SimMap(object):
         for fieldID in shuffled_IDs:
             if self.fieldIDs[fieldID].terrain is None:
                 self._set_terrain(self.fieldIDs[fieldID])
-        
+                self._createResources(self.fieldIDs[fieldID])
+                
             #~ self._createCity(self.fieldIDs[fieldID])
-            #~ self._createRessources(self.fieldIDs[fieldID])
         #~ for c in self.cities:
             #~ c.detect_ressources()
             #~ c.calculate_values()
             #~ c.calculate_growth()
+        
+    def _createResources(self, field):
+        """
+        Each terrain type offers an own range of choice, as well as a 
+        base chance to generate anything
+        Btw, Woods mean "Wood that is very good quality and thus gives
+        bonus in warfare"
+        """
+        if field.terrain == "Ocean":
+            chance = 34 # 1 in 3 fields contain resources
+            resources = ["Whale"]*2 + ["Clam"]*2 + ["Fish"]*16
+        elif field.terrain == "High Mountains":
+            chance = 10
+            resources = ["Iron"]*5 + ["Stone"]*10
+        elif field.terrain == "Low Mountains":
+            chance = 34
+            resources = (["Copper"]*5 + ["Iron"]*3 + ["Marble"]*2 + ["Stone"]*5
+                + ["Gems"]*1 + ["Gold"]*1 + ["Silver"]*2)
+        elif field.terrain == "Wetlands":
+            chance = 67
+            resources = ["Spices"]*1 + ["Sugar"]*1 + ["Wheat"]*3 + ["Corn"]*3 + ["Rice"]*3
+        elif field.terrain == "Swamps":
+            chance = 5
+            resources = ["rice"]
+        elif field.terrain == "Desert":
+            chance = 10
+            resources = ["Copper"]*5 + ["Marble"]*3 + ["Gems"]*1
+        elif field.terrain == "Steppe":
+            chance = 34
+            resources = (["Corn"]*3 + ["Copper"]*1 + ["Horses"]*5 + ["Furs"]*3
+                + ["Ivory"]*1 + ["pasture"]*5)
+        elif field.terrain == "Grassland":
+            chance = 34
+            resources = ["Horses"]*2 + ["Corn"]*5 + ["Wheat"]*5 + ["pasture"]*3
+        elif field.terrain == "Woodland":
+            chance = 34
+            resources = (["Dyes"]*1 + ["Furs"]*3 + ["Spices"]*1 + ["Sugar"]*1
+                + ["Fruits"]*5 + ["Game"]*5 + ["Woods"]*5)
+        if field.hill and field.terrain != "High Mountains" and field.terrain != "Low Mountains":
+            resources.extend(["Copper"]*3 + ["Iron"]*2 + ["Marble"]*1 + ["Stone"]*3
+                + ["Gems"]*1 + ["Gold"]*1 + ["Silver"]*1 + ["Wine"]*5)
+        r = random.randint(0, 99)
+        if r < chance:
+            field.resource = random.choice(resources)   
         
     
     def _set_terrain(self, field):
@@ -388,7 +432,7 @@ class Field(object):
         self.exact_height = None
         self.city = None
         self._neighbors()
-        self.ressource = None
+        self.resource = None
         self.simMap = simMap
         self.owner = None # City
         self.river = []
@@ -396,6 +440,8 @@ class Field(object):
         self.terrain = None
         self.humidity = None
         self.hill = False
+        self.pop = 0
+        self.graphic = None
         
     def __str__(self):
         if self.height == 0:
@@ -464,24 +510,24 @@ class Field(object):
         return field_neighbors
             
         
-    def color(self):
-        # PLACEHOLDERS
-        # THIS WILL INSTEAD REFER TO THE TERRAIN TYPE
-        if self.height < self.simMap.sealevel-20:
-            clr = "navy"
-        elif self.height < self.simMap.sealevel:
-            clr = "blue"
-        elif self.height < 120:
-            clr = "PaleGreen2"
-        elif self.height < 160:
-            clr = "green"
-        elif self.height < 180:
-            clr = "orange"
-        elif self.height < 190:
-            clr = "brown"
-        else:
-            clr = "gray60"
-        return clr
+    #~ def color(self):
+        #~ # PLACEHOLDERS
+        #~ # THIS WILL INSTEAD REFER TO THE TERRAIN TYPE
+        #~ if self.height < self.simMap.sealevel-20:
+            #~ clr = "navy"
+        #~ elif self.height < self.simMap.sealevel:
+            #~ clr = "blue"
+        #~ elif self.height < 120:
+            #~ clr = "PaleGreen2"
+        #~ elif self.height < 160:
+            #~ clr = "green"
+        #~ elif self.height < 180:
+            #~ clr = "orange"
+        #~ elif self.height < 190:
+            #~ clr = "brown"
+        #~ else:
+            #~ clr = "gray60"
+        #~ return clr
         
     def createCity(self, simMap, x, y):
         city = City(simMap, self, x, y)

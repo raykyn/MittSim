@@ -7,6 +7,7 @@ from city import City
 from culture import start_Cultures
 import events
 from tkinter import *
+from tkinter.ttk import *
 
 
 class Application():
@@ -41,15 +42,12 @@ class Application():
         
     def create_map(self, fields):
         try:
-            self.inner_map.delete("all")
+            self.game_window.delete("all")
         except:
             pass
-        #frame = self.game_map
         size = self.field_size
         map_height = len(fields)*size
         map_width = len(fields[0])*size
-        #~ self.inner_map = Canvas(frame, width=map_width, height=map_height)
-        self.inner_map = self.game_window
         
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
@@ -78,17 +76,17 @@ class Application():
                     else:
                         terrain_color = "navy"
                     river_color = "blue"
-                self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag="field")
+                f.graphic = self.game_window.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag=("field", f.fieldID))
                 if (self.show_terrain or self.mapmode == "terrains") and f.hill:
-                    self.inner_map.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black")
-                    self.inner_map.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black")
+                    self.game_window.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black")
+                    self.game_window.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black")
                 if f.river is not None:
                     for t in f.river:
                         x1, y1, x2, y2 = t
-                        self.inner_map.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag="river")
-                        self.inner_map.create_line(x*size+(size/2), y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
+                        self.game_window.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag="river")
+                        self.game_window.create_line(x*size+(size/2), y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
                 if f.lake:
-                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag="lake", outline="")
+                    self.game_window.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag=("lake", f.fieldID), outline="")
                 if self.mapmode != "t":
                     pass
                     #~ if f.city is not None:
@@ -99,69 +97,67 @@ class Application():
                                 #~ citycolor = f.owner.culture.color
                             #~ else:
                                 #~ citycolor = "white"
-                        #~ self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
+                        #~ self.game_window.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
                     #~ elif f.owner is not None:
                         #~ if self.mapmode == "p": # political
                             #~ bordercolor = f.owner.color
                         #~ elif self.mapmode == "c": # cultural
                             #~ bordercolor = f.owner.culture.color
-                        #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
+                        #~ self.game_window.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
                     #~ elif f.owner is None:
-                        #~ self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
-        #~ self.inner_map.bind("<ButtonRelease-1>", self._get_field)
-        #~ self.inner_map.bind("<Button-1>", self._scroll_start)
-        #~ self.inner_map.bind("<B1-Motion>", self._scroll_move)
-        #~ self.inner_map.pack()
+                        #~ self.game_window.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
+        #~ self.game_window.bind("<ButtonRelease-1>", self._get_field)
+        #~ self.game_window.bind("<Button-1>", self._scroll_start)
+        #~ self.game_window.bind("<B1-Motion>", self._scroll_move)
+        #~ self.game_window.pack()
         
     def _get_field(self, event):
         size = self.field_size
         canvas = event.widget
         x = canvas.canvasx(event.x)
         y = canvas.canvasy(event.y)
-        xpos = int(x/size)
-        ypos = int(y/size)
         # Show all the stuff in the right hand side bar :D
-        f = self.fields[ypos][xpos]
-        print(f.exact_height)
+        f_graphic = self.game_window.find_closest(x, y)
+        f = self.game.fieldIDs[int(self.game_window.gettags(f_graphic)[1])]
+        #f = self.fields[int(y)][int(x)]
         # Set the StringVars for Field Info
         self.field_info_values["FIELD ID:"].set(str(f.fieldID))
-        terrain_types = {
-            0:"Ocean",
-            1:"Coastal",
-            2:"Grassland",
-            3:"Woodland",
-            4:"Hills",
-            5:"Lower Mountains",
-            6:"Higher Mountains"
-        }
-        self.field_info_values["TERRAIN TYPE:"].set(terrain_types[f.height])
-        self.field_info_values["RESSOURCE:"].set(str(f.ressource))
+        self.field_info_values["TERRAIN TYPE:"].set(f.terrain)
+        self.field_info_values["RESSOURCE:"].set(str(f.resource))
+        other = []
+        if f.hill:
+            other.append("Hill")
+        if f.lake:
+            other.append("Lake")
+        elif len(f.river) > 0:
+            other.append("River")
+        self.field_info_values["OTHER:"].set(', '.join(other))
         # Set the StringVars for City Info
-        if f.owner is not None:
-            self._city_name.set(f.owner.name)
-            if f.owner.leader is not None:
-                self.city_info_values["Leader:"].set(f.owner.leader.firstname)
-            else:
-                self.city_info_values["Leader:"].set(None)
-            self.city_info_values["Population:"].set(round(f.owner.pop))
-            if f.owner.culture is not None:
-                self.city_info_values["Culture:"].set(f.owner.culture.name)
-            else:
-                self.city_info_values["Culture:"].set(None)
-            self.city_info_values["Food:"].set(f.owner.values["f"])
-            self.city_info_values["Production:"].set(f.owner.values["p"])
-            self.city_info_values["Money:"].set(f.owner.values["m"])
-            self.city_info_values["Ressources:"].set(', '.join(f.owner.ressources))
-            self.char_info.pack_forget()
-            self.showing = f.owner
-            self.city_info.pack(fill="both")
-            self.emp_info.pack(fill="both")
-        else:
-            self._city_name.set("")
-            for l in self.city_info_values:
-                self.city_info_values[l].set("")
-            self.city_info.pack_forget()
-            self.emp_info.pack_forget()
+        #~ if f.owner is not None:
+            #~ self._city_name.set(f.owner.name)
+            #~ if f.owner.leader is not None:
+                #~ self.city_info_values["Leader:"].set(f.owner.leader.firstname)
+            #~ else:
+                #~ self.city_info_values["Leader:"].set(None)
+            #~ self.city_info_values["Population:"].set(round(f.owner.pop))
+            #~ if f.owner.culture is not None:
+                #~ self.city_info_values["Culture:"].set(f.owner.culture.name)
+            #~ else:
+                #~ self.city_info_values["Culture:"].set(None)
+            #~ self.city_info_values["Food:"].set(f.owner.values["f"])
+            #~ self.city_info_values["Production:"].set(f.owner.values["p"])
+            #~ self.city_info_values["Money:"].set(f.owner.values["m"])
+            #~ self.city_info_values["Ressources:"].set(', '.join(f.owner.ressources))
+            #~ self.char_info.pack_forget()
+            #~ self.showing = f.owner
+            #~ self.city_info.pack(fill="both")
+            #~ self.emp_info.pack(fill="both")
+        #~ else:
+            #~ self._city_name.set("")
+            #~ for l in self.city_info_values:
+                #~ self.city_info_values[l].set("")
+            #~ self.city_info.pack_forget()
+            #~ self.emp_info.pack_forget()
         
 
         
@@ -182,8 +178,8 @@ class Application():
         mapmodes.add_command(label="Terrains", command= lambda x="terrains": self._change_mapmode(x))
         
     def _export_map(self):
-        self.inner_map.update()
-        self.inner_map.postscript(file="exported_map.ps", colormode="color")
+        self.game_window.update()
+        self.game_window.postscript(file="exported_map.ps", colormode="color")
         
     def _change_mapmode(self, mode):
         self.mapmode = mode
@@ -203,8 +199,9 @@ class Application():
         self.game_window.grid(row=0, column=0)
         #self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
         self.game_window.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(canvas))
-        self.game_window.bind("<Button-1>", self._scroll_start)
-        self.game_window.bind("<B1-Motion>", self._scroll_move)
+        self.game_window.bind("<Button-1>", self._get_field)
+        self.game_window.bind("<Button-3>", self._scroll_start)
+        self.game_window.bind("<B3-Motion>", self._scroll_move)
         self.game_window.bind("<Button-4>", self.zoomerP)
         self.game_window.bind("<Button-5>", self.zoomerM)
         self.game_window.bind("<MouseWheel>",self.zoomer)
@@ -238,10 +235,10 @@ class Application():
         self.game_window.scan_dragto(event.x, event.y, gain=1)
         
     def _scroll_start(self, event):
-        self.inner_map.scan_mark(event.x, event.y)
+        self.game_window.scan_mark(event.x, event.y)
 
     def _scroll_move(self, event):
-        self.inner_map.scan_dragto(event.x, event.y, gain=1)
+        self.game_window.scan_dragto(event.x, event.y, gain=1)
 
     def _onFrameConfigure(self, canvas):
         '''Reset the scroll region to encompass the inner frame'''
@@ -257,7 +254,7 @@ class Application():
         
     def _create_description_frame(self):
         desc = Frame(self.root)
-        desc.grid(row=0, column=2)
+        desc.grid(row=0, column=2, sticky=N+W+E, ipady=10)
         # 3 frames packed below that:
         # Field-Info, City-Info, Empire-Info
         self._field_info(desc)
@@ -266,12 +263,13 @@ class Application():
         self._emp_info(desc)
         
     def _field_info(self, desc):
-        field_info = Frame(desc, relief=RIDGE)
-        field_info.pack(fill="both")
+        field_info = LabelFrame(desc, text="FIELD INFO")
+        field_info.pack(fill="x", expand=1, padx=10, ipady=5)
         field_info_list = [
             "FIELD ID:",
             "TERRAIN TYPE:",
-            "RESSOURCE:"
+            "RESSOURCE:",
+            "OTHER:"
         ]
         self.field_info_values = {}
         for n, label in enumerate(field_info_list):
@@ -297,9 +295,9 @@ class Application():
         self.city_info_values = {}
         for n, label in enumerate(city_info_list):
             self.city_info_values[label] = StringVar(self.city_info, "")
-            Label(self.city_info, justify=LEFT, text=label).grid(row=n+1, column=0, sticky=W+E, padx=10)
-            Message(self.city_info, justify=LEFT, textvariable=self.city_info_values[label], width=200).grid(row=n+1, column=1, sticky=W+E)
-        Button(self.city_info, justify=LEFT, text="More", command=self._show_char_info).grid(row=1, column=2)
+            Label(self.city_info, text=label).grid(row=n+1, column=0, sticky=W+E, padx=10)
+            Message(self.city_info, textvariable=self.city_info_values[label], width=200).grid(row=n+1, column=1, sticky=W+E)
+        Button(self.city_info, text="More", command=self._show_char_info).grid(row=1, column=2)
         
     def _show_char_info(self):
         self.city_info.pack_forget()
@@ -340,10 +338,10 @@ class Application():
         speeds = [(100, "FAST"), (1000, "NORMAL"), (3000, "SLOW")]
         col = 0
         for sp, d in speeds:
-            btn = Button(date_frame, text=d, command= lambda speed=sp: self._set_speed(speed), width=5)
+            btn = Button(date_frame, text=d, command= lambda speed=sp: self._set_speed(speed), width=7)
             btn.grid(row=1, column=col)
             col += 1
-        pause = Button(date_frame, text="PAUSE", command=self.cancel, width=5)
+        pause = Button(date_frame, text="PAUSE", command=self.cancel, width=7)
         pause.grid(row=1, column=3)
         self.counter_label()
         
