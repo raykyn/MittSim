@@ -6,8 +6,8 @@ import random
 from collections import Counter
 from city import City
 from culture import start_Cultures
+from field import *
 from interface import Application
-from tkinter import *
 
 class SimMap(object):
     
@@ -30,16 +30,6 @@ class SimMap(object):
             
             
     def fillfield(self):
-        #~ self.terrain_chances = Counter({
-            #~ 0:self.ocean_chance,
-            #~ 1:self.coastal_chance,
-            #~ 2:self.lowlands_chance,
-            #~ 3:self.woodlands_chance,
-            #~ 4:self.highlands_chance,
-            #~ 5:self.lower_m_chance,
-            #~ 6:self.higher_m_chance
-        #~ })
-        #~ self.sorted_terrain_chances = sorted(list(self.terrain_chances.elements()))
         self.fieldIDs = {}
         self.fieldIDcounter = 1
         for x in range(self.height):
@@ -67,12 +57,28 @@ class SimMap(object):
             if self.fieldIDs[fieldID].terrain is None:
                 self._set_terrain(self.fieldIDs[fieldID])
                 self._createResources(self.fieldIDs[fieldID])
-                
-            #~ self._createCity(self.fieldIDs[fieldID])
-        #~ for c in self.cities:
-            #~ c.detect_ressources()
-            #~ c.calculate_values()
-            #~ c.calculate_growth()
+                self.fieldIDs[fieldID].set_values()
+                if self.fieldIDs[fieldID].terrain != "Ocean" and self.fieldIDs[fieldID].terrain != "High Mountains" and not self.fieldIDs[fieldID].lake:
+                    self._createCity(self.fieldIDs[fieldID])
+        for c in self.cities:
+            c.detect_resources()
+            c.calculate_values()
+            c.calculate_growth()
+        #~ # Grow cities as long until a first city exists, then start game
+        a_city = False
+        tick = 0
+        while not a_city:
+            tick += 1
+            for c in self.cities:
+                c.calculate_growth()
+                c.pop = c.pop + (c.pop*c.growth)
+                if c.pop >= 500 and not c.active and c.field.owner == c:
+                    print("REACHED")
+                    c.make_first_city(self.culture_models)
+                    print(c.name)
+                    print(c.growth)
+                    a_city = True
+                    print(tick)
         
     def _createResources(self, field):
         """
@@ -96,24 +102,24 @@ class SimMap(object):
             resources = ["Spices"]*1 + ["Sugar"]*1 + ["Wheat"]*3 + ["Corn"]*3 + ["Rice"]*3
         elif field.terrain == "Swamps":
             chance = 5
-            resources = ["rice"]
+            resources = ["Rice"]
         elif field.terrain == "Desert":
             chance = 10
             resources = ["Copper"]*5 + ["Marble"]*3 + ["Gems"]*1
         elif field.terrain == "Steppe":
             chance = 34
             resources = (["Corn"]*3 + ["Copper"]*1 + ["Horses"]*5 + ["Furs"]*3
-                + ["Ivory"]*1 + ["pasture"]*5)
+                + ["Ivory"]*1 + ["Pasture"]*5)
         elif field.terrain == "Grassland":
             chance = 34
-            resources = ["Horses"]*2 + ["Corn"]*5 + ["Wheat"]*5 + ["pasture"]*3
+            resources = ["Horses"]*2 + ["Corn"]*5 + ["Wheat"]*5 + ["Pasture"]*3
         elif field.terrain == "Woodland":
             chance = 34
             resources = (["Dyes"]*1 + ["Furs"]*3 + ["Spices"]*1 + ["Sugar"]*1
                 + ["Fruits"]*5 + ["Game"]*5 + ["Woods"]*5)
         if field.hill and field.terrain != "High Mountains" and field.terrain != "Low Mountains":
             resources.extend(["Copper"]*3 + ["Iron"]*2 + ["Marble"]*1 + ["Stone"]*3
-                + ["Gems"]*1 + ["Gold"]*1 + ["Silver"]*1 + ["Wine"]*5)
+                + ["Gems"]*1 + ["Gold"]*1 + ["Silver"]*1 + ["Wine"]*5 + ["Pasture"]*3)
         r = random.randint(0, 99)
         if r < chance:
             field.resource = random.choice(resources)   
@@ -307,23 +313,10 @@ class SimMap(object):
                 
                 
     def _createCity(self, field):
-        # check if no other city exists there yet.
-        for nx, ny in field.dia_neighbors:
-            try:
-                if self.fields[nx][ny].city is not None:
-                    return None
-            except:
-                pass
-        city_gen = self.city_generation_chance*100
-        m = random.randint(1,100)
-        if (field.height == 2 or field.height == 3) and m <= city_gen:
-            field.createCity(self, field.x, field.y)
-        elif field.height == 4 and m <= city_gen*0.65:
-            field.createCity(self, field.x, field.y)
-        elif field.height == 5 and m <= city_gen*0.3:
-            field.createCity(self, field.x, field.y)
-        elif field.height == 6 and m <= city_gen*0.15:
-            field.createCity(self, field.x, field.y)
+        """
+        A village is created on every field at the start.
+        """
+        field.createCity(self, field.x, field.y)
         
         
     def setlevel(self, field):
@@ -367,174 +360,9 @@ class SimMap(object):
     def create_tkinter(self):
         self.interface = Application(self, self.fields)
         
-        
-    def _draw_city(self, field, city, width, height):
-        field.create_rectangle(width/4, height/4, width*0.75, height*0.75, fill=city.color, tag="city")
-        
-    def _onFrameConfigure(self, canvas):
-        '''Reset the scroll region to encompass the inner frame'''
-        canvas.configure(scrollregion=canvas.bbox("all"))
-        
-    def _field_info(self, field):
-        self._info_ID.set(str(field.fieldID))
-        self._info_height.set(str(field.height))
-        self._info_ress.set(str(field.ressource))
-        if field.owner is not None:
-            self._city_name.set(field.owner.name)
-            city_atts = field.owner.getAttr()
-            for attr, value in self.city_info.items():
-                if attr == "pop":
-                    value.set(round(city_atts[attr]))
-                else:
-                    value.set(city_atts[attr])
-            self._city_ressources.set('\n'.join(field.owner.ressources))
-            self._food.set(field.owner.values["f"])
-            self._production.set(field.owner.values["p"])
-            self._money.set(field.owner.values["m"])
-            if field.owner.culture is not None:
-                self._show_culture.set(field.owner.culture.name)
-            else:
-                self._show_culture.set("")
-            if field.owner.leader is not None:
-                self._show_leader.set(field.owner.leader.fullname)
-            else:
-                self._show_leader.set("")
-        else:
-            self._city_name.set("")
-            for attr, value in self.city_info.items():
-                value.set("")
-            self._city_ressources.set("")
-            self._food.set("")
-            self._production.set("")
-            self._money.set("")
-            self._show_leader.set("")
-            self._show_culture.set("")
-        self.root.update()
-        
-    #~ def _on_mousewheel(self, canvas):
-        #~ canvas.yview_scroll(-1*(event.delta/120), "units")
-        
-    #~ def show_field(self):
-        #~ pass
-        
     def _leave(self):
         exit()
-                        
-class Field(object):
-    
-    def __init__(self, simMap, id, x, y):
-        self.fieldID = id
-        self.x = x
-        self.y = y
-        #Höhe: 0: Sealevel 1: Coastal 2: Lowlands 3: Flatlands 4: Highlands 
-        #5: Low mountains 6: High Mountains
-        self.height = None
-        self.exact_height = None
-        self.city = None
-        self._neighbors()
-        self.resource = None
-        self.simMap = simMap
-        self.owner = None # City
-        self.river = []
-        self.lake = False
-        self.terrain = None
-        self.humidity = None
-        self.hill = False
-        self.pop = 0
-        self.graphic = None
-        
-    def __str__(self):
-        if self.height == 0:
-            sign = "O"
-        elif self.height == 1:
-            sign = "o"
-        elif self.height == 2:
-            sign = "_"
-        elif self.height == 3:
-            sign = "-"
-        elif self.height == 4:
-            sign = "~"
-        elif self.height == 5:
-            sign = "+"
-        else:
-            sign = "^"
-        #print = """%s""" % (sign)
-        return str(self.fieldID)
-        
-    def __repr__(self):
-        return str(self.fieldID)
-        
-    def _neighbors(self):
-        """This method is still in use on one field, but is subject to 
-        change as soon as I've got a better method of only getting
-        the direct neighbors"""
-        self.neighbors = []
-        self.upN = (self.x,self.y-1)
-        self.neighbors.append(self.upN)
-        self.rightN = (self.x+1, self.y)
-        self.neighbors.append(self.rightN)
-        self.downN = (self.x, self.y+1)
-        self.neighbors.append(self.downN)
-        self.leftN = (self.x-1, self.y)
-        self.neighbors.append(self.leftN)
-        self.dia_neighbors = []
-        self.upleftN = (self.x-1,self.y-1)
-        self.dia_neighbors.append(self.upleftN)
-        self.uprightN = (self.x+1,self.y-1)
-        self.dia_neighbors.append(self.uprightN)
-        self.botleftN = (self.x-1,self.y+1)
-        self.dia_neighbors.append(self.botleftN)
-        self.botrightN = (self.x+1, self.y+1)
-        self.dia_neighbors.append(self.botrightN)
-        self.dia_neighbors.extend(self.neighbors)
-        
-    def field_neighbor(self, reach):
-        field_neighbors = []
-        fields = self.simMap.fields
-        all_coord = []
-        for n in range(1, reach+1): # n is current distance
-            combinations = []
-            # generate possible coordinates
-            for m in range(0,n+1):
-                k = n-m
-                combinations.append((k, m))
-                combinations.append((-k, m))
-                combinations.append((k, -m))
-                combinations.append((-k, -m))
-            all_coord.extend(combinations)
-        for x, y in set(all_coord):
-            xpos = self.x+x
-            ypos = self.y+y
-            if xpos >= 0 and ypos >= 0 and xpos < self.simMap.height and ypos < self.simMap.width:
-                field_neighbors.append(fields[xpos][ypos])
-        return field_neighbors
-            
-        
-    #~ def color(self):
-        #~ # PLACEHOLDERS
-        #~ # THIS WILL INSTEAD REFER TO THE TERRAIN TYPE
-        #~ if self.height < self.simMap.sealevel-20:
-            #~ clr = "navy"
-        #~ elif self.height < self.simMap.sealevel:
-            #~ clr = "blue"
-        #~ elif self.height < 120:
-            #~ clr = "PaleGreen2"
-        #~ elif self.height < 160:
-            #~ clr = "green"
-        #~ elif self.height < 180:
-            #~ clr = "orange"
-        #~ elif self.height < 190:
-            #~ clr = "brown"
-        #~ else:
-            #~ clr = "gray60"
-        #~ return clr
-        
-    def createCity(self, simMap, x, y):
-        city = City(simMap, self, x, y)
-        self.city = city
-        self.owner = self.city
-        simMap.cities.append(self.city)
-
+                    
         
 def main():
     newmap = SimMap(180,90)

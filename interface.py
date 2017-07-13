@@ -17,7 +17,7 @@ class Application():
         self.mapmode = "p"
         self.show_terrain = True
         self.fields = fields
-        self.field_size = 12
+        self.field_size = 10
         # Changing counters
         self._job = None
         self.counter = 0
@@ -41,13 +41,15 @@ class Application():
         mainloop()
         
     def create_map(self, fields):
-        try:
-            self.game_window.delete("all")
-        except:
-            pass
+        #~ try:
+            #~ self.inner_map.delete("all")
+        #~ except:
+            #~ pass
+        #~ frame = self.game_map
         size = self.field_size
         map_height = len(fields)*size
         map_width = len(fields[0])*size
+        #~ self.inner_map = Canvas(frame, width=map_width, height=map_height)
         
         for y, row in enumerate(fields):
             for x, f in enumerate(row):
@@ -63,7 +65,7 @@ class Application():
                         "Grassland":"PaleGreen2",
                         "Woodland":"forest green",
                         "Desert":"khaki",
-                        "Wetlands":"turquoise",
+                        "Wetlands":"SeaGreen1",
                         "Swamps":"olive drab",
                         "Steppe":"yellow green",
                         "Ocean":"navy"
@@ -76,40 +78,47 @@ class Application():
                     else:
                         terrain_color = "navy"
                     river_color = "blue"
-                f.graphic = self.game_window.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag=("field", f.fieldID))
+                f.graphic = self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag=("field", f.fieldID))
                 if (self.show_terrain or self.mapmode == "terrains") and f.hill:
-                    self.game_window.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black")
-                    self.game_window.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black")
+                    self.inner_map.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black", tag=("hill1", f.fieldID))
+                    self.inner_map.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black", tag=("hill2", f.fieldID))
                 if f.river is not None:
                     for t in f.river:
                         x1, y1, x2, y2 = t
-                        self.game_window.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag="river")
-                        self.game_window.create_line(x*size+(size/2), y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag="river")
+                        self.inner_map.create_line(x*size+size/2, y*size+size/2, (y1*size)+(size/2), (x1*size)+(size/2), fill=river_color, tag=("river", f.fieldID))
+                        self.inner_map.create_line(x*size+(size/2), y*size+size/2, y2*size+size/2, x2*size+size/2, fill=river_color, tag=("river", f.fieldID))
                 if f.lake:
-                    self.game_window.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag=("lake", f.fieldID), outline="")
+                    self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=river_color, tag=("lake", f.fieldID), outline="")
                 if self.mapmode != "t":
-                    pass
-                    #~ if f.city is not None:
-                        #~ if self.mapmode == "p": # political
-                            #~ citycolor = f.owner.color
-                        #~ elif self.mapmode == "c": # cultural
-                            #~ if f.owner.culture is not None:
-                                #~ citycolor = f.owner.culture.color
-                            #~ else:
-                                #~ citycolor = "white"
-                        #~ self.game_window.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag="city")
-                    #~ elif f.owner is not None:
-                        #~ if self.mapmode == "p": # political
-                            #~ bordercolor = f.owner.color
-                        #~ elif self.mapmode == "c": # cultural
-                            #~ bordercolor = f.owner.culture.color
-                        #~ self.game_window.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
-                    #~ elif f.owner is None:
-                        #~ self.game_window.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
-        #~ self.game_window.bind("<ButtonRelease-1>", self._get_field)
-        #~ self.game_window.bind("<Button-1>", self._scroll_start)
-        #~ self.game_window.bind("<B1-Motion>", self._scroll_move)
-        #~ self.game_window.pack()
+                    if f.city is not None:
+                        if f.city.active:
+                            if self.mapmode == "p": # political
+                                citycolor = f.owner.color
+                            elif self.mapmode == "c": # cultural
+                                if f.owner.culture is not None:
+                                    citycolor = f.owner.culture.color
+                                else:
+                                    citycolor = "white"
+                            self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag=("city", f.fieldID))
+                    if f.owner is not None:
+                        if f.owner.active:
+                            if self.mapmode == "p": # political
+                                bordercolor = f.owner.color
+                            elif self.mapmode == "c": # cultural
+                                bordercolor = f.owner.culture.color
+                            self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline=bordercolor, tag="border")
+                        else:
+                            self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
+                    else:
+                        self.inner_map.create_rectangle(x*size+1, y*size+1, (x+1)*size-1, (y+1)*size-1, outline="", tag="border")
+
+        self.inner_map.bind("<Button-3>", self._get_field)
+        self.inner_map.bind("<Button-1>", self._scroll_start)
+        self.inner_map.bind("<B1-Motion>", self._scroll_move)
+        self.inner_map.bind("<Button-4>", self.zoomerP)
+        self.inner_map.bind("<Button-5>", self.zoomerM)
+        #~ self.inner_map.pack()
+        
         
     def _get_field(self, event):
         size = self.field_size
@@ -117,13 +126,17 @@ class Application():
         x = canvas.canvasx(event.x)
         y = canvas.canvasy(event.y)
         # Show all the stuff in the right hand side bar :D
-        f_graphic = self.game_window.find_closest(x, y)
-        f = self.game.fieldIDs[int(self.game_window.gettags(f_graphic)[1])]
+        f_graphic = self.inner_map.find_closest(x, y)
+        f = self.game.fieldIDs[int(self.inner_map.gettags(f_graphic)[1])]
         #f = self.fields[int(y)][int(x)]
         # Set the StringVars for Field Info
         self.field_info_values["FIELD ID:"].set(str(f.fieldID))
         self.field_info_values["TERRAIN TYPE:"].set(f.terrain)
         self.field_info_values["RESSOURCE:"].set(str(f.resource))
+        self.field_info_values["POPULATION:"].set(str(round(f.city.pop)))
+        self.field_info_values["FOOD:"].set(str(f.food))
+        self.field_info_values["PRODUCTION:"].set(str(f.production))
+        self.field_info_values["MONEY:"].set(str(f.money))
         other = []
         if f.hill:
             other.append("Hill")
@@ -147,7 +160,7 @@ class Application():
             #~ self.city_info_values["Food:"].set(f.owner.values["f"])
             #~ self.city_info_values["Production:"].set(f.owner.values["p"])
             #~ self.city_info_values["Money:"].set(f.owner.values["m"])
-            #~ self.city_info_values["Ressources:"].set(', '.join(f.owner.ressources))
+            #~ self.city_info_values["resources:"].set(', '.join(f.owner.resources))
             #~ self.char_info.pack_forget()
             #~ self.showing = f.owner
             #~ self.city_info.pack(fill="both")
@@ -178,8 +191,8 @@ class Application():
         mapmodes.add_command(label="Terrains", command= lambda x="terrains": self._change_mapmode(x))
         
     def _export_map(self):
-        self.game_window.update()
-        self.game_window.postscript(file="exported_map.ps", colormode="color")
+        self.inner_map.update()
+        self.inner_map.postscript(file="exported_map.ps", colormode="color")
         
     def _change_mapmode(self, mode):
         self.mapmode = mode
@@ -194,61 +207,59 @@ class Application():
     
         
     def _create_game_map_frame(self):
-        self.game_window = Canvas(self.root, borderwidth=0, width=self.screen_width*0.8, height=self.screen_height*0.8)
-        #self.game_map = Frame(self.game_window)
-        self.game_window.grid(row=0, column=0)
-        #self.game_window.create_window((8,8), window=self.game_map, anchor="nw")
-        self.game_window.bind("<Configure>", lambda event, canvas=self.game_window: self._onFrameConfigure(canvas))
-        self.game_window.bind("<Button-1>", self._get_field)
-        self.game_window.bind("<Button-3>", self._scroll_start)
-        self.game_window.bind("<B3-Motion>", self._scroll_move)
-        self.game_window.bind("<Button-4>", self.zoomerP)
-        self.game_window.bind("<Button-5>", self.zoomerM)
-        self.game_window.bind("<MouseWheel>",self.zoomer)
+        self.inner_map = Canvas(self.root, borderwidth=0, width=self.screen_width*0.8, height=self.screen_height*0.8)
+        #~ self.game_map = Frame(self.inner_map)
+        self.inner_map.grid(row=0, column=0)
+        #~ self.inner_map.create_window((8,8), window=self.game_map, anchor="nw")
+        self.inner_map.bind("<Configure>", lambda event, canvas=self.inner_map: self._onFrameConfigure(canvas))
+        #~ self.inner_map.bind("<Button-1>", self._get_field)
+        #~ self.inner_map.bind("<Button-1>", self._scroll_start)
+        #~ self.inner_map.bind("<B1-Motion>", self._scroll_move)
+        #~ self.inner_map.bind("<Button-4>", self.zoomerP)
+        #~ self.inner_map.bind("<Button-5>", self.zoomerM)
+        #~ self.inner_map.bind("<MouseWheel>",self.zoomer)
         
     #windows zoom
     def zoomer(self,event):
-        true_x = self.game_window.canvasx(event.x)
-        true_y = self.game_window.canvasy(event.y)
         if (event.delta > 0):
-            self.game_window.scale("all", true_x, true_y, 1.1, 1.1)
+            self.inner_map.scale("all", 0, 0, 1.1, 1.1)
+            self.field_size = self.field_size*1.1
         elif (event.delta < 0):
-            self.game_window.scale("all", true_x, true_y, 0.9, 0.9)
-        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+            self.inner_map.scale("all", 0, 0, 0.9, 0.9)
+            self.field_size = self.field_size*0.9
+        self.inner_map.configure(scrollregion = self.inner_map.bbox("all"))
 
     #linux zoom
     def zoomerP(self,event):
-        true_x = self.game_window.canvasx(event.x)
-        true_y = self.game_window.canvasy(event.y)
-        self.game_window.scale("all", true_x, true_y, 1.1, 1.1)
-        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+        self.inner_map.scale("all", 0, 0, 1.1, 1.1)
+        self.field_size = self.field_size*1.1
+        self.inner_map.configure(scrollregion = self.inner_map.bbox("all"))
     def zoomerM(self,event):
-        true_x = self.game_window.canvasx(event.x)
-        true_y = self.game_window.canvasy(event.y)
-        self.game_window.scale("all", true_x, true_y, 0.9, 0.9)
-        self.game_window.configure(scrollregion = self.game_window.bbox("all"))
+        self.inner_map.scale("all", 0, 0, 0.9, 0.9)
+        self.field_size = self.field_size*0.9
+        self.inner_map.configure(scrollregion = self.inner_map.bbox("all"))
         
     def _scroll_start(self, event):
-        self.game_window.scan_mark(event.x, event.y)
+        self.inner_map.scan_mark(event.x, event.y)
 
     def _scroll_move(self, event):
-        self.game_window.scan_dragto(event.x, event.y, gain=1)
+        self.inner_map.scan_dragto(event.x, event.y, gain=1)
         
     def _scroll_start(self, event):
-        self.game_window.scan_mark(event.x, event.y)
+        self.inner_map.scan_mark(event.x, event.y)
 
     def _scroll_move(self, event):
-        self.game_window.scan_dragto(event.x, event.y, gain=1)
+        self.inner_map.scan_dragto(event.x, event.y, gain=1)
 
     def _onFrameConfigure(self, canvas):
         '''Reset the scroll region to encompass the inner frame'''
         canvas.configure(scrollregion=canvas.bbox("all"))
         
     def _create_scrollbars(self):
-        self.vsb = Scrollbar(self.root, orient="vertical", command=self.game_window.yview)
-        self.hsb = Scrollbar(self.root, orient="horizontal", command=self.game_window.xview)
-        self.game_window.configure(yscrollcommand=self.vsb.set)
-        self.game_window.configure(xscrollcommand=self.hsb.set)
+        self.vsb = Scrollbar(self.root, orient="vertical", command=self.inner_map.yview)
+        self.hsb = Scrollbar(self.root, orient="horizontal", command=self.inner_map.xview)
+        self.inner_map.configure(yscrollcommand=self.vsb.set)
+        self.inner_map.configure(xscrollcommand=self.hsb.set)
         self.vsb.grid(row=0,column=1,sticky=N+E+S)
         self.hsb.grid(row=1,column=0, sticky=W+S+E)
         
@@ -269,12 +280,16 @@ class Application():
             "FIELD ID:",
             "TERRAIN TYPE:",
             "RESSOURCE:",
-            "OTHER:"
+            "OTHER:",
+            "POPULATION:",
+            "FOOD:",
+            "PRODUCTION:",
+            "MONEY:"
         ]
         self.field_info_values = {}
         for n, label in enumerate(field_info_list):
             self.field_info_values[label] = StringVar(field_info, "")
-            Label(field_info, justify=LEFT, text=label).grid(row=n, column=0, sticky=N+W, padx=10)
+            Label(field_info, justify=LEFT, text=label).grid(row=n, column=0,sticky=N+W, padx=10)
             Label(field_info, justify=LEFT, textvariable=self.field_info_values[label]).grid(row=n, column=1, sticky=N+W)
         
     def _city_info(self, desc):
@@ -290,7 +305,7 @@ class Application():
             "Food:",
             "Production:",
             "Money:",
-            "Ressources:"
+            "resources:"
         ]
         self.city_info_values = {}
         for n, label in enumerate(city_info_list):
@@ -343,7 +358,7 @@ class Application():
             col += 1
         pause = Button(date_frame, text="PAUSE", command=self.cancel, width=7)
         pause.grid(row=1, column=3)
-        self.counter_label()
+        #self.counter_label()
         
     def cancel(self):
         if self._job is not None:

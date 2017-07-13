@@ -13,9 +13,9 @@ to parse the whole list of cities every time.
 def run(tick, game, interface):
     tick = int(str(tick)[-1])
     for c in game.cities:
-        if c.seed == tick:
+        if int(str(c.seed)[-1]) == tick:
             # Only triggers all 10 seconds
-            c.detect_ressources()
+            c.detect_resources()
             c.calculate_values()
             c.calculate_growth()
             grow(c, game.culture_models, interface)
@@ -24,6 +24,6 @@ def run(tick, game, interface):
                 
 def grow(c, models, interface):
     c.pop = c.pop + (c.pop*c.growth)
-    if c.pop >= 500 and not c.active:
+    if c.pop >= 500 and not c.active and c.field.owner == c:
         c.make_city(models, interface)
         interface._alert_new_city(c)

@@ -13,7 +13,6 @@ class City():
         self.culture_name = ""
         self.color = "purple"
         self.active = False
-        self.pop = random.randint(150, 450)
         self.tech = 0
         self.simMap = simMap
         self.fields = simMap.fields
@@ -21,74 +20,37 @@ class City():
         self.seed = random.randint(0, 9) # splits cities into ten groups
         self.x = x
         self.y = y
-        self.ressources = []
-        self.terrain = []
+        self.resources = []
         self.values = {"f":0,"p":0,"m":0}
         self.growth = 0.0
         self.leader = None
+        self.territory = [field] # Keeps all fields that are owned by this city
+        self.pop = random.randint(1, 10)
+            
         
-    def detect_ressources(self):
-        self.ressources = []
-        self.terrain = []
-        if self.field.ressource is not None:
-            self.ressources.append(self.field.ressource)
-        self.terrain.append(self.field.height)
-        for f in self.field.field_neighbor(2):
-            if f.ressource is not None and (f.owner is None or f.owner == self):
-                self.ressources.append(f.ressource)
-            elif (f.owner is None or f.owner == self):
-                self.terrain.append(f.height)
+    def detect_resources(self):
+        self.resources = []
+        for field in self.territory:
+            if field.resource is not None:
+                self.resources.append(field.resource)
+            
                 
     def calculate_values(self):
         # Dictionary for what terrain the city gets what
-        # Three general ressources:
+        # Three general resources:
         # - food (important for growth)
         # - production (important if war and technology)
-        # - money (important for trade, war and culture)
-        terrain_dict = {
-            0:{"f":1,"p":0,"m":3},
-            1:{"f":2.5,"p":0,"m":1.5},
-            2:{"f":2,"p":1,"m":1},
-            3:{"f":2,"p":1,"m":1},
-            4:{"f":1.5,"p":1.5,"m":1},
-            5:{"f":1.25,"p":2,"m":1},
-            6:{"f":0.5,"p":2,"m":1.5}
-        }
-        ressource_dict = {
-            "fishes":{"f":2,"p":0,"m":0},
-            "pearls":{"f":1,"p":0,"m":1},
-            "crabs":{"f":2,"p":0,"m":0},
-            "whales":{"f":1,"p":1,"m":1},
-            "horses":{"f":1,"p":2,"m":0}, # Bonus in Warfare
-            "fruits":{"f":2,"p":0,"m":0},
-            "cotton":{"f":0,"p":1,"m":1},
-            "sugar":{"f":1,"p":0,"m":2},
-            "pasture":{"f":2,"p":1,"m":0},
-            "wheats":{"f":3,"p":0,"m":0},
-            "game":{"f":2,"p":0,"m":0},
-            "fur":{"f":1,"p":1,"m":1},
-            "mushroom":{"f":1,"p":0,"m":0},
-            "silk":{"f":0,"p":1,"m":2},
-            "spices":{"f":1,"p":0,"m":2},
-            "woods":{"f":0,"p":3,"m":0}, # Bonus in Naval and Defensive Warfare
-            "wine":{"f":1,"p":0,"m":2},
-            "coal":{"f":0,"p":2,"m":0},
-            "iron":{"f":0,"p":3,"m":0}, # Very important in Warfare
-            "gold":{"f":0,"p":0,"m":2},
-            "gems":{"f":0,"p":0,"m":3},
-            "silver":{"f":0,"p":0,"m":1},
-            "copper":{"f":0,"p":2,"m":0}, # Substitute for iron
-            "stone":{"f":0,"p":2,"m":0} # Bonus in Defensive Warfare
-        }
-        self.values = {"f":0,"p":0,"m":0}
-        for t in self.terrain:
-            self.values["f"] += terrain_dict[t]["f"]
-            self.values["p"] += terrain_dict[t]["p"]
-            self.values["m"] += terrain_dict[t]["m"]
-        for p in self.ressources:
-            self.values["f"] += ressource_dict[p]["f"]
-            self.values["p"] += ressource_dict[p]["p"]
-            self.values["m"] += ressource_dict[p]["m"]
+        # - money (buying this and trading. Buying: Mercenaries for example)
+        for field in self.territory:
+            self.values["f"] += field.food
+            self.values["p"] += field.production
+            self.values["m"] += field.money
+        if len(self.territory) == 1:
+            for n in field.field_neighbor(1):
+                self.values["f"] += n.food/2
+                self.values["p"] += n.production/2
+                self.values["m"] += n.money/2
+        
             
     def calculate_growth(self):
         # We assume a maximum population growth a little higher then 
@@ -141,33 +103,70 @@ class City():
         if interface.mapmode != "t":
             self.change_color(interface)
         for f in self.field.field_neighbor(2):
-            if f.owner is None:
+            if f.owner is not None:
+                if not f.owner.active:
+                    f.owner = self
+                    if interface.mapmode != "t":
+                        self.claim_field(f, interface)
+            else:
                 f.owner = self
                 if interface.mapmode != "t":
                     self.claim_field(f, interface)
         interface.inner_map.update_idletasks()
                 
     def change_color(self, interface):
-        xpos = (self.x*interface.field_size)+interface.field_size/2
-        ypos = (self.y*interface.field_size)+interface.field_size/2
-        c = interface.inner_map.find_closest(ypos, xpos)
+        #~ xpos = (self.x*interface.field_size)+interface.field_size/2
+        #~ ypos = (self.y*interface.field_size)+interface.field_size/2
+        #~ c = interface.game_window.find_closest(ypos, xpos)
+        #~ if interface.mapmode == "p":
+            #~ color = self.color
+        #~ elif interface.mapmode == "c":
+            #~ color = self.culture.color
+        #~ interface.game_window.itemconfig(c, fill=color)
+        #~ interface.game_window.update_idletasks()
+        size = interface.field_size
         if interface.mapmode == "p":
             color = self.color
         elif interface.mapmode == "c":
             color = self.culture.color
-        interface.inner_map.itemconfig(c, fill=color)
+        interface.inner_map.create_rectangle((self.field.y*size)+(size/4), (self.field.x*size)+(size/4), ((self.field.y+1)*size)-(size/4), (self.field.x+1)*size-size/4, fill=color, tag=("city", self.field.fieldID))
         interface.inner_map.update_idletasks()
         
-        
     def claim_field(self, field, interface):
-        xpos = (field.x*interface.field_size)+1
-        ypos = (field.y*interface.field_size)+1
-        c = interface.inner_map.find_closest(ypos, xpos)
+        xpos = (field.x*interface.field_size)
+        ypos = (field.y*interface.field_size)
+        c = interface.inner_map.find_overlapping(ypos, xpos, ypos+(2*interface.field_size/10), xpos+(2*interface.field_size/10))
+        for item in c:
+            if interface.inner_map.gettags(item)[0] == "border":
+                d = item
+                break
+        #~ c = interface.inner_map.find_closest(ypos, xpos)
         if interface.mapmode == "p":
             color = self.color
         elif interface.mapmode == "c":
             color = self.culture.color
-        interface.inner_map.itemconfig(c, outline=color)
+        interface.inner_map.itemconfig(d, outline=color)
+        
+    def make_first_city(self, models):
+        self.active = True
+        r = lambda: random.randint(0,255)
+        self.color = '#%02X%02X%02X' % (r(),r(),r())
+        new_culture = False
+        if self.culture == None:
+            self.culture = Culture(self.color)
+            new_culture = True
+        self.name = self.culture.generate_name(models, "t")
+        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name or ')' in self.name:
+            self.name = self.culture.generate_name(models, "t")
+        if new_culture:
+            self.culture.name = self.name + "ian"
+        self.leader = Character(models, self.culture, self, 40)
+        for f in self.field.field_neighbor(5):
+            if f.city is not None:
+                if f.city.culture == None:
+                    f.city.culture = self.culture
+        for f in self.field.field_neighbor(2):
+            f.owner = self
         
         
     def getAttr(self):
