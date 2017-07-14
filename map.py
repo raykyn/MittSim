@@ -154,12 +154,14 @@ class SimMap(object):
             return None
         if len(field.river) == 0:
             terrains = ["Desert"]*2 + ["Steppe"]*18 + ["Grassland"]*30 + ["Woodland"]*50
-        elif len(field.river) > 0:
+        elif len(field.river) > 0 and not field.hill:
             terrains = ["Wetlands"]*50 + ["Swamps"]*5 + ["Grassland"]*30 + ["Woodland"]*15
             for f in field.field_neighbor(1):
                 if f.exact_height < self.sealevel:
                     terrains = ["Swamps"]*10 + ["Wetlands"]*90
                     break
+        elif len(field.river) > 0 and field.hill:
+            terrains = ["Wetlands"]*10 + ["Swamps"]*5 + ["Grassland"]*55 + ["Woodland"]*30
         total = 0
         found_valids = 0
         reach = 1

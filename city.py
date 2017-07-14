@@ -99,7 +99,7 @@ class City():
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
-                    f.city.change_color(interface)
+                    #~ f.city.change_color(interface)
         if interface.mapmode != "t":
             self.change_color(interface)
         for f in self.field.field_neighbor(2):
