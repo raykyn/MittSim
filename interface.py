@@ -196,7 +196,7 @@ class Application():
         
     def _export_map(self):
         self.inner_map.update()
-        self.inner_map.postscript(file="exported_map.ps", colormode="color")
+        self.inner_map.postscript(file="exported_map.ps", colormode="color", height=self.game.height*self.field_size, width=self.game.width*self.field_size, x=0, y=0)
         
     def _change_mapmode(self, mode):
         self.mapmode = mode
