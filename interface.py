@@ -133,10 +133,10 @@ class Application():
         self.field_info_values["FIELD ID:"].set(str(f.fieldID))
         self.field_info_values["TERRAIN TYPE:"].set(f.terrain)
         self.field_info_values["RESSOURCE:"].set(str(f.resource))
-        if f.owner is not None:
-            self.field_info_values["POPULATION:"].set(str(round(f.owner.pop)))
-        else:
-            self.field_info_values["POPULATION:"].set(str(0))
+        #~ if f.owner is not None:
+            #~ self.field_info_values["POPULATION:"].set(str(round(f.city.pop)))
+        #~ else:
+            #~ self.field_info_values["POPULATION:"].set(str(0))
         self.field_info_values["FOOD:"].set(str(f.food))
         self.field_info_values["PRODUCTION:"].set(str(f.production))
         self.field_info_values["MONEY:"].set(str(f.money))
@@ -149,32 +149,33 @@ class Application():
             other.append("River")
         self.field_info_values["OTHER:"].set(', '.join(other))
         # Set the StringVars for City Info
-        if f.owner.active:
-            self.city_info.pack(fill="x", expand=1, padx=10, ipady=5)
-            self._city_name.set(f.owner.name)
-            #~ if f.owner.leader is not None:
-            self.city_info_values["Leader:"].set(f.owner.leader.firstname)
-            #~ else:
-                #~ self.city_info_values["Leader:"].set(None)
-            self.city_info_values["Population:"].set(round(f.owner.pop))
-            #~ if f.owner.culture is not None:
-            self.city_info_values["Culture:"].set(f.owner.culture.name)
-            #~ else:
-                #~ self.city_info_values["Culture:"].set(None)
-            self.city_info_values["Food:"].set(f.owner.values["f"])
-            self.city_info_values["Production:"].set(f.owner.values["p"])
-            self.city_info_values["Money:"].set(f.owner.values["m"])
-            self.city_info_values["resources:"].set(', '.join(f.owner.resources))
-            #~ self.char_info.pack_forget()
-            #~ self.showing = f.owner
-            #~ self.city_info.pack(fill="both")
-            #~ self.emp_info.pack(fill="both")
-        else:
-            #~ self._city_name.set("")
-            #~ for l in self.city_info_values:
-                #~ self.city_info_values[l].set("")
-            self.city_info.pack_forget()
-            #~ self.emp_info.pack_forget()
+        if f.owner is not None:
+            if f.owner.active:
+                self.city_info.pack(fill="x", expand=1, padx=10, ipady=5)
+                self._city_name.set(f.owner.name)
+                #~ if f.owner.leader is not None:
+                self.city_info_values["Leader:"].set(f.owner.leader.firstname)
+                #~ else:
+                    #~ self.city_info_values["Leader:"].set(None)
+                self.city_info_values["Population:"].set(round(f.owner.pop))
+                #~ if f.owner.culture is not None:
+                self.city_info_values["Culture:"].set(f.owner.culture.name)
+                #~ else:
+                    #~ self.city_info_values["Culture:"].set(None)
+                self.city_info_values["Food:"].set(round(f.owner.values["f"],2))
+                self.city_info_values["Production:"].set(round(f.owner.values["p"],2))
+                self.city_info_values["Money:"].set(round(f.owner.values["m"],2))
+                self.city_info_values["Resources:"].set(', '.join(f.owner.resources))
+                #~ self.char_info.pack_forget()
+                #~ self.showing = f.owner
+                #~ self.city_info.pack(fill="both")
+                #~ self.emp_info.pack(fill="both")
+            else:
+                #~ self._city_name.set("")
+                #~ for l in self.city_info_values:
+                    #~ self.city_info_values[l].set("")
+                self.city_info.pack_forget()
+                #~ self.emp_info.pack_forget()
         
 
         
@@ -285,7 +286,7 @@ class Application():
             "TERRAIN TYPE:",
             "RESSOURCE:",
             "OTHER:",
-            "POPULATION:",
+            #~ "POPULATION:",
             "FOOD:",
             "PRODUCTION:",
             "MONEY:"
@@ -301,7 +302,7 @@ class Application():
         #self.city_info.pack(fill="both")
         self._city_name = StringVar(desc, "")
         city_name = Message(self.city_info, justify=LEFT, textvariable=self._city_name, font="Verdana 15 bold", width=300)
-        city_name.grid(pady=20, columnspan=2, sticky=N+W)
+        city_name.grid(pady=5, columnspan=2, sticky=N+W)
         city_info_list = [
             "Leader:",
             "Population:",
@@ -309,13 +310,13 @@ class Application():
             "Food:",
             "Production:",
             "Money:",
-            "resources:"
+            "Resources:"
         ]
         self.city_info_values = {}
         for n, label in enumerate(city_info_list):
             self.city_info_values[label] = StringVar(self.city_info, "")
             Label(self.city_info, text=label).grid(row=n+1, column=0, sticky=N+W, padx=10)
-            Message(self.city_info, textvariable=self.city_info_values[label], width=200).grid(row=n+1, column=1, sticky=N+W)
+            Message(self.city_info, textvariable=self.city_info_values[label], width=180).grid(row=n+1, column=1, sticky=N+W)
         #~ Button(self.city_info, text="More", command=self._show_char_info).grid(row=1, column=2)
         
     def _show_char_info(self):

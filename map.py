@@ -27,6 +27,7 @@ class SimMap(object):
         self.culture_models = start_Cultures()
         self.culture_models.load_all()
         self.game_map = None
+        self.city_stage1 = 150
             
             
     def fillfield(self):
@@ -62,6 +63,7 @@ class SimMap(object):
                     self._createCity(self.fieldIDs[fieldID])
         for c in self.cities:
             c.detect_resources()
+            c.calculate_tech()
             c.calculate_values()
             c.calculate_growth()
         #~ # Grow cities as long until a first city exists, then start game
@@ -72,7 +74,7 @@ class SimMap(object):
             for c in self.cities:
                 c.calculate_growth()
                 c.pop = c.pop + (c.pop*c.growth)
-                if c.pop >= 500 and not c.active and c.field.owner == c:
+                if c.pop >= self.city_stage1 and not c.active and c.field.owner == c:
                     print("REACHED")
                     c.make_first_city(self.culture_models)
                     print(c.name)

@@ -3,6 +3,7 @@
 import random
 from culture import Culture
 from characters import Character
+from collections import Counter
 
 class City():
     def __init__(self, simMap, field, x, y):
@@ -26,6 +27,10 @@ class City():
         self.leader = None
         self.territory = [field] # Keeps all fields that are owned by this city
         self.pop = random.randint(1, 10)
+        self.food_limit = 500
+        self.food_tech = 0
+        self.prod_tech = 0
+        self.money_tech = 0
             
         
     def detect_resources(self):
@@ -41,15 +46,24 @@ class City():
         # - food (important for growth)
         # - production (important if war and technology)
         # - money (buying this and trading. Buying: Mercenaries for example)
+        self.values = {"f":0,"p":0,"m":0}
         for field in self.territory:
-            self.values["f"] += field.food
-            self.values["p"] += field.production
-            self.values["m"] += field.money
+            self.values["f"] += field.food+(self.values["f"]*self.prod_tech)
+            self.values["p"] += field.production+(self.values["p"]*self.prod_tech)
+            self.values["m"] += field.money+(self.values["m"]*self.prod_tech)
         if len(self.territory) == 1:
             for n in field.field_neighbor(1):
-                self.values["f"] += n.food/2
-                self.values["p"] += n.production/2
-                self.values["m"] += n.money/2
+                if n.owner is not None and not n.owner.active:
+                    self.values["f"] += n.food/2
+                    self.values["p"] += n.production/2
+                    self.values["m"] += n.money/2
+                elif n.owner is None:
+                    self.values["f"] += n.food/2
+                    self.values["p"] += n.production/2
+                    self.values["m"] += n.money/2
+            self.values["f"] = self.values["f"]/3
+            self.values["p"] = self.values["p"]/3
+            self.values["m"] = self.values["m"]/3
         
             
     def calculate_growth(self):
@@ -80,6 +94,20 @@ class City():
             # go to war to steal food or conquer villages with excess food.
         self.growth = max_growth * (remaining_food/nec_food)
         
+    
+    def calculate_tech(self):
+        # Tech represents also things like infrastructure and everything
+        # that aids in the production of more resources.
+        # Later, the leader persoality will decide in which resource
+        # the tech flows. For the moment, it will evenly be split.
+        # First, set a maximum growth rate of technology a city can reach (Or maybe not)
+        # Should tech growth rate be lower if big city? Yes! (Or too much snowballing)
+        # Honestly no clue how high I should put this.
+        tech_grow = ((self.values["p"])/(self.pop*100))
+        self.food_tech += tech_grow/3
+        self.prod_tech += tech_grow/3
+        self.money_tech += tech_grow/3
+        
         
     def make_city(self, models, interface):
         self.active = True
@@ -95,21 +123,23 @@ class City():
         if new_culture:
             self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self, 40)
-        for f in self.field.field_neighbor(5):
+        for f in self.field.field_neighbor(10):
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
                     #~ f.city.change_color(interface)
         if interface.mapmode != "t":
             self.change_color(interface)
-        for f in self.field.field_neighbor(2):
+        for f in self.field.field_neighbor(1):
             if f.owner is not None:
                 if not f.owner.active:
                     f.owner = self
+                    self.territory.append(f)
                     if interface.mapmode != "t":
                         self.claim_field(f, interface)
             else:
                 f.owner = self
+                self.territory.append(f)
                 if interface.mapmode != "t":
                     self.claim_field(f, interface)
         interface.inner_map.update_idletasks()
@@ -146,12 +176,14 @@ class City():
         elif interface.mapmode == "c":
             color = self.culture.color
         interface.inner_map.itemconfig(d, outline=color)
+        interface.inner_map.update_idletasks()
         
     def make_first_city(self, models):
         self.active = True
         r = lambda: random.randint(0,255)
         self.color = '#%02X%02X%02X' % (r(),r(),r())
         new_culture = False
+        self.food_limit = 750
         if self.culture == None:
             self.culture = Culture(self.color)
             new_culture = True
@@ -161,12 +193,39 @@ class City():
         if new_culture:
             self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self, 40)
-        for f in self.field.field_neighbor(5):
+        for f in self.field.field_neighbor(10):
             if f.city is not None:
                 if f.city.culture == None:
                     f.city.culture = self.culture
-        for f in self.field.field_neighbor(2):
+        for f in self.field.field_neighbor(1):
             f.owner = self
+            self.territory.append(f)
+                
+    
+    def grow_territory(self, interface):
+        field_values = Counter()
+        for t in self.territory:
+            for f in t.field_neighbor(1):
+                if f.fieldID not in field_values.keys():
+                    if f.owner is None or not f.owner.active:
+                        field_values[f.fieldID] = f.production + f.food + f.money
+                        if f.resource in ["Horses", "Iron", "Copper", "Woods", "Stone"]:
+                            field_values[f.fieldID] += 5 # prefer strategic resources
+        # get the highest Counter-Entry. 
+        # Check if at least two own fields are next to the new one (also diagonally)
+        # this shall prevent of just taking all river fields
+        for f in field_values:
+            field = self.simMap.fieldIDs[f]
+            neighboring = 0
+            for n in field.get_dia():
+                if n.owner == self:
+                    neighboring += 1
+            if neighboring > 1:
+                field.owner = self
+                self.territory.append(field)
+                self.claim_field(field, interface)
+                break
+        self.food_limit = len(self.territory)*150
         
         
     def getAttr(self):
