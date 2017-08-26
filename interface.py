@@ -74,9 +74,9 @@ class Application():
                     terrain_color = terrain_colors[f.terrain]
                     river_color = "blue"
                 else:
-                    if f.terrain != "Ocean" and (f.owner is None or not f.owner.active):
+                    if f.terrain not in ["Ocean", "Coast"] and (f.owner is None or not f.owner.active):
                         terrain_color = "white"
-                    elif f.terrain == "Ocean":
+                    elif f.terrain in ["Ocean", "Coast"]:
                         terrain_color = "navy"
                     else:
                         if self.mapmode == "p":
@@ -108,6 +108,17 @@ class Application():
                                 else:
                                     citycolor = "white"
                             self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag=("city", f.fieldID))
+                        else:
+                            #~ print("inactive city created!")
+                            if self.mapmode == "p": # political
+                                citycolor = "purple"
+                            elif self.mapmode == "c": # cultural
+                                if f.owner.culture is not None:
+                                    citycolor = f.owner.culture.color
+                                else:
+                                    citycolor = "purple"
+                            self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag=("city", f.fieldID))
+                    
                     if f.owner is not None:
                         if f.owner.active:
                             if self.mapmode == "p": # political
@@ -145,9 +156,7 @@ class Application():
             #~ self.field_info_values["POPULATION:"].set(str(round(f.city.pop)))
         #~ else:
             #~ self.field_info_values["POPULATION:"].set(str(0))
-        self.field_info_values["FOOD:"].set(str(f.food))
-        self.field_info_values["PRODUCTION:"].set(str(f.production))
-        self.field_info_values["MONEY:"].set(str(f.money))
+        self.field_info_values["WEALTH:"].set(str(f.wealth))
         other = []
         if f.hill:
             other.append("Hill")
@@ -170,9 +179,8 @@ class Application():
                 self.city_info_values["Culture:"].set(f.owner.culture.name)
                 #~ else:
                     #~ self.city_info_values["Culture:"].set(None)
-                self.city_info_values["Food:"].set(round(f.owner.values["f"],2))
-                self.city_info_values["Production:"].set(round(f.owner.values["p"],2))
-                self.city_info_values["Money:"].set(round(f.owner.values["m"],2))
+                self.city_info_values["Wealth:"].set(round(f.owner.wealth, 2))
+                self.city_info_values["WpC:"].set(round(f.owner.wpc, 2))
                 self.city_info_values["Resources:"].set(', '.join(f.owner.resources))
                 #~ self.char_info.pack_forget()
                 #~ self.showing = f.owner
@@ -295,9 +303,7 @@ class Application():
             "RESSOURCE:",
             "OTHER:",
             #~ "POPULATION:",
-            "FOOD:",
-            "PRODUCTION:",
-            "MONEY:"
+            "WEALTH:",
         ]
         self.field_info_values = {}
         for n, label in enumerate(field_info_list):
@@ -315,9 +321,8 @@ class Application():
             "Leader:",
             "Population:",
             "Culture:",
-            "Food:",
-            "Production:",
-            "Money:",
+            "Wealth:",
+            "WpC:",
             "Resources:"
         ]
         self.city_info_values = {}

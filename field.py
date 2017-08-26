@@ -3,6 +3,47 @@
 import random
 from city import City
 
+terrain_dict = {
+        "Coast":4,
+        "Grassland":4,
+        "Woodland":3,
+        "Low Mountains":3,
+        "High Mountains":2,
+        "Wetlands":5, #Highest
+        "Swamps":2,
+        "Steppe":3,
+        "Desert":1, #Lowest
+        "Ocean":1
+        }
+resource_dict = {
+        "Fish":3,
+        "Clam":2,
+        "Whale":2,
+        "Horses":2, # Bonus in Warfare
+        "Ivory":2, # Bonus in Warfare
+        "Fruits":2,
+        "Dyes":2,
+        "Sugar":2,
+        "Pasture":2,
+        "Wheat":3,
+        "Corn":2,
+        "Rice":2,
+        "Game":2,
+        "Furs":2,
+        "Silk":2,
+        "Spices":2,
+        "Woods":2, # Bonus in Naval and Defensive Warfare
+        "Wine":2,
+        "Iron":2, # Very important in Warfare
+        "Gold":3,
+        "Gems":3,
+        "Silver":2,
+        "Copper":1, # Substitute for iron
+        "Stone":2, # Bonus in Defensive Warfare
+        "Marble":2 # Bonus in Defensive Warfare
+        }
+
+
 class Field(object):
     
     def __init__(self, simMap, id, x, y):
@@ -23,9 +64,8 @@ class Field(object):
         self.hill = False
         self.graphic = None
         self.seed = random.randint(0,99)
-        self.food = 0
-        self.production = 0
-        self.money = 0
+        self.wealth = 0
+        
         
     def __str__(self):
         if self.height == 0:
@@ -116,54 +156,11 @@ class Field(object):
         city = City(simMap, self, x, y)
         self.city = city
         self.owner = city
-        simMap.cities.append(self.city)
         self.pop = city.pop
         
     
     def set_values(self):
-        terrain_dict = {
-            "Coast":{"f":2.5,"p":0,"m":0},
-            "Grassland":{"f":2,"p":1,"m":0},
-            "Woodland":{"f":1.5,"p":1.5,"m":0},
-            "Low Mountains":{"f":1,"p":2,"m":0},
-            "High Mountains":{"f":0.5,"p":0,"m":0},
-            "Wetlands":{"f":3,"p":0,"m":0},
-            "Swamps":{"f":1,"p":0,"m":0},
-            "Steppe":{"f":1.5,"p":1.5,"m":0},
-            "Desert":{"f":0,"p":0.5,"m":0},
-            "Ocean":{"f":1.5,"p":0,"m":0}
-        }
-        resource_dict = {
-            "Fish":{"f":2,"p":0,"m":0},
-            "Clam":{"f":1,"p":0,"m":1},
-            "Whale":{"f":1,"p":1,"m":1},
-            "Horses":{"f":1,"p":2,"m":0}, # Bonus in Warfare
-            "Ivory":{"f":0,"p":2,"m":1}, # Bonus in Warfare
-            "Fruits":{"f":2,"p":0,"m":0},
-            "Dyes":{"f":0,"p":1,"m":1},
-            "Sugar":{"f":1,"p":0,"m":2},
-            "Pasture":{"f":2,"p":1,"m":0},
-            "Wheat":{"f":3,"p":0,"m":0},
-            "Corn":{"f":2,"p":0,"m":0},
-            "Rice":{"f":2,"p":0,"m":0},
-            "Game":{"f":2,"p":0,"m":0},
-            "Furs":{"f":1,"p":1,"m":1},
-            "Silk":{"f":0,"p":1,"m":2},
-            "Spices":{"f":1,"p":0,"m":2},
-            "Woods":{"f":0,"p":3,"m":0}, # Bonus in Naval and Defensive Warfare
-            "Wine":{"f":1,"p":0,"m":2},
-            "Iron":{"f":0,"p":3,"m":0}, # Very important in Warfare
-            "Gold":{"f":0,"p":0,"m":2},
-            "Gems":{"f":0,"p":0,"m":3},
-            "Silver":{"f":0,"p":0,"m":1},
-            "Copper":{"f":0,"p":2,"m":0}, # Substitute for iron
-            "Stone":{"f":0,"p":2,"m":0}, # Bonus in Defensive Warfare
-            "Marble":{"f":0,"p":1,"m":2} # Bonus in Defensive Warfare
-        }
-        self.food += terrain_dict[self.terrain]["f"]
-        self.production += terrain_dict[self.terrain]["p"]
-        self.money += terrain_dict[self.terrain]["m"]
+        """Assign wealth values to terrain and ressources"""
+        self.wealth += terrain_dict[self.terrain]
         if self.resource is not None:
-            self.food += resource_dict[self.resource]["f"]
-            self.production += resource_dict[self.resource]["p"]
-            self.money += resource_dict[self.resource]["m"]
+            self.wealth += resource_dict[self.resource]

@@ -22,16 +22,14 @@ class City():
         self.x = x
         self.y = y
         self.resources = []
-        self.values = {"f":0,"p":0,"m":0}
+        self.wealth = 0
+        self.wpc = 0
         self.growth = 0.0
         self.leader = None
         self.territory = [field] # Keeps all fields that are owned by this city
-        self.pop = random.randint(1, 10)
-        self.food_limit = 500
-        self.food_tech = 0
-        self.prod_tech = 0
-        self.money_tech = 0
         self.chars = [] # Keep a list of all characters that live in this city
+        
+        self.pop = 0
             
         
     def detect_resources(self):
@@ -42,73 +40,32 @@ class City():
             
                 
     def calculate_values(self):
-        # Dictionary for what terrain the city gets what
-        # Three general resources:
-        # - food (important for growth)
-        # - production (important if war and technology)
-        # - money (buying this and trading. Buying: Mercenaries for example)
-        self.values = {"f":0,"p":0,"m":0}
+        # Only Wealth as an abstract value of the cities productivity, food and luxury resources
+        self.wealth = 0
         for field in self.territory:
-            self.values["f"] += field.food+(self.values["f"]*self.prod_tech)
-            self.values["p"] += field.production+(self.values["p"]*self.prod_tech)
-            self.values["m"] += field.money+(self.values["m"]*self.prod_tech)
-        if len(self.territory) == 1:
-            for n in field.field_neighbor(1):
-                if n.owner is not None and not n.owner.active:
-                    self.values["f"] += n.food/2
-                    self.values["p"] += n.production/2
-                    self.values["m"] += n.money/2
-                elif n.owner is None:
-                    self.values["f"] += n.food/2
-                    self.values["p"] += n.production/2
-                    self.values["m"] += n.money/2
-            self.values["f"] = self.values["f"]/3
-            self.values["p"] = self.values["p"]/3
-            self.values["m"] = self.values["m"]/3
+            self.wealth += field.wealth
+        if self.pop > 0:
+            self.wpc = self.wealth / self.pop
+            # bonus for big population (ppl per field)
+            # The maximum bonus it can give is 10% (if 160 ppl/field)
+            ppf = self.pop/len(self.territory)
+            bonus = 0.1 * ppf/160
+            self.wealth = self.wealth + self.wealth*bonus
         
             
     def calculate_growth(self):
-        # We assume a maximum population growth a little higher then 
-        # the high medieval ages (doubled pop in 300 yrs).
-        # In 10 Ticks (Months), the population grows by 0.5% at max
-        # With this model, most cities will reach active status around
-        # Tick 140 (around 12 yrs), depending on food (around 20 food is
-        # needed to get max_growth wiht 500 Pop) 1000 pop is the ceiling
-        # for a city with 20 Food.
-        food = self.values["f"]
-        max_growth = 0.005 
-        # Each person consumes 0.02 Food units
-        # The more food is accessible per Person, the higher the max
-        # growth is.
-        # if food == pop*0.02 => growth = 0
-        # elif food == pop*0.02 => growth = 0.005
-        # Check first if enough food to sustain pop
-        # (This can lead to some cities never becoming real cities bc of
-        # missing food if other cities grab their fields)
-        nec_food =  self.pop*0.02
-        remaining_food = food-nec_food
-        if remaining_food > nec_food:
-            remaining_food = nec_food # Excess food can and should be 
-            # traded off. Villages in the mountains will try to get food,
-            # While villages in the plains will try to get metals and stone.
-            # If a city lacks food to grow further, it will also more likely
-            # go to war to steal food or conquer villages with excess food.
-        self.growth = max_growth * (remaining_food/nec_food)
-        
-    
-    def calculate_tech(self):
-        # Tech represents also things like infrastructure and everything
-        # that aids in the production of more resources.
-        # Later, the leader persoality will decide in which resource
-        # the tech flows. For the moment, it will evenly be split.
-        # First, set a maximum growth rate of technology a city can reach (Or maybe not)
-        # Should tech growth rate be lower if big city? Yes! (Or too much snowballing)
-        # Honestly no clue how high I should put this.
-        tech_grow = ((self.values["p"])/(self.pop*100))
-        self.food_tech += tech_grow/3
-        self.prod_tech += tech_grow/3
-        self.money_tech += tech_grow/3
-        
+        # wealth per capita is the most important thing at the beginning
+        # we assume that at the start of the game, all the cities have
+        # a medium WpC (Wealth per Capita)
+        # As we calculate the starting pop as 10* wealth, the medium
+        # WpC would be 0.1
+        # minimum WpC is 0.05
+        # maximum (usable) WpC is 0.2 (everything above is not really needed)
+        # let's assume medium growth is 0.0025
+        wpc = self.wealth / self.pop # WpC
+        max_growth = 0.005
+        self.growth = max_growth - (0.0025 / (wpc * 10))
+                
         
     def make_city(self, models, interface):
         self.active = True
@@ -149,15 +106,6 @@ class City():
         interface.inner_map.update_idletasks()
                 
     def change_color(self, interface):
-        #~ xpos = (self.x*interface.field_size)+interface.field_size/2
-        #~ ypos = (self.y*interface.field_size)+interface.field_size/2
-        #~ c = interface.game_window.find_closest(ypos, xpos)
-        #~ if interface.mapmode == "p":
-            #~ color = self.color
-        #~ elif interface.mapmode == "c":
-            #~ color = self.culture.color
-        #~ interface.game_window.itemconfig(c, fill=color)
-        #~ interface.game_window.update_idletasks()
         size = interface.field_size
         if interface.mapmode == "p":
             color = self.color
@@ -212,8 +160,18 @@ class City():
                 if f.city.culture == None:
                     f.city.culture = self.culture
         for f in self.field.field_neighbor(1):
-            f.owner = self
-            self.territory.append(f)
+            if f.owner is not None:
+                if not f.owner.active:
+                    f.owner = self
+                    self.territory.append(f)
+            else:
+                f.owner = self
+                self.territory.append(f)
+            
+        self.calculate_values()
+        self.detect_resources()
+        self.pop = self.wealth*10 + random.randint(-100, 100)
+        self.wpc = self.wealth/self.pop
                 
     
     def grow_territory(self, interface):
