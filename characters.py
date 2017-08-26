@@ -30,3 +30,4 @@ def die(self):
     # Standard succession type is Gavelkind => depending on Culture
     # Next line is only a placeholder until a proper system is implemented
     successor = Character(models, self.culture, self.place, random.randint(30,60))
+    self.state = "dead"

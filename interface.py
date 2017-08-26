@@ -68,18 +68,26 @@ class Application():
                         "Wetlands":"SeaGreen1",
                         "Swamps":"olive drab",
                         "Steppe":"yellow green",
+                        "Coast":"blue",
                         "Ocean":"navy"
                     }
                     terrain_color = terrain_colors[f.terrain]
                     river_color = "blue"
                 else:
-                    if f.terrain != "Ocean":
+                    if f.terrain != "Ocean" and (f.owner is None or not f.owner.active):
                         terrain_color = "white"
-                    else:
+                    elif f.terrain == "Ocean":
                         terrain_color = "navy"
+                    else:
+                        if self.mapmode == "p":
+                            terrain_color = f.owner.color
+                        elif self.mapmode == "c":
+                            terrain_color = f.owner.culture.color
+                        else:
+                            terrain_color = "white"
                     river_color = "blue"
                 f.graphic = self.inner_map.create_rectangle(x*size, y*size, (x+1)*size, (y+1)*size, fill=terrain_color, outline="", tag=("field", f.fieldID))
-                if (self.show_terrain or self.mapmode == "terrains") and f.hill:
+                if f.hill:
                     self.inner_map.create_line(x*size+1, y*size+size*(2/3), x*size+(size/2), y*size+size/3, fill="black", tag=("hill1", f.fieldID))
                     self.inner_map.create_line(x*size+size/2, y*size+size/3, x*size+size-1, y*size+size*(2/3), fill="black", tag=("hill2", f.fieldID))
                 if f.river is not None:
@@ -316,7 +324,7 @@ class Application():
         for n, label in enumerate(city_info_list):
             self.city_info_values[label] = StringVar(self.city_info, "")
             Label(self.city_info, text=label).grid(row=n+1, column=0, sticky=N+W, padx=10)
-            Message(self.city_info, textvariable=self.city_info_values[label], width=180).grid(row=n+1, column=1, sticky=N+W)
+            Message(self.city_info, textvariable=self.city_info_values[label], width=160).grid(row=n+1, column=1, sticky=N+W)
         #~ Button(self.city_info, text="More", command=self._show_char_info).grid(row=1, column=2)
         
     def _show_char_info(self):

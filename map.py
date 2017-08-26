@@ -59,7 +59,7 @@ class SimMap(object):
                 self._set_terrain(self.fieldIDs[fieldID])
                 self._createResources(self.fieldIDs[fieldID])
                 self.fieldIDs[fieldID].set_values()
-                if self.fieldIDs[fieldID].terrain != "Ocean" and self.fieldIDs[fieldID].terrain != "High Mountains" and not self.fieldIDs[fieldID].lake:
+                if self.fieldIDs[fieldID].exact_height >= self.sealevel and self.fieldIDs[fieldID].terrain != "High Mountains" and not self.fieldIDs[fieldID].lake:
                     self._createCity(self.fieldIDs[fieldID])
         for c in self.cities:
             c.detect_resources()
@@ -91,7 +91,10 @@ class SimMap(object):
         """
         if field.terrain == "Ocean":
             chance = 34 # 1 in 3 fields contain resources
-            resources = ["Whale"]*2 + ["Clam"]*2 + ["Fish"]*16
+            resources = ["Whale"]*4 + ["Clam"]*2 + ["Fish"]*8
+        elif field.terrain == "Coast":
+            chance = 34 # 1 in 3 fields contain resources
+            resources = ["Whale"]*1 + ["Clam"]*2 + ["Fish"]*16
         elif field.terrain == "High Mountains":
             chance = 10
             resources = ["Iron"]*5 + ["Stone"]*10
@@ -120,7 +123,7 @@ class SimMap(object):
             resources = (["Dyes"]*1 + ["Furs"]*3 + ["Spices"]*1 + ["Sugar"]*1
                 + ["Fruits"]*5 + ["Game"]*5 + ["Woods"]*5)
         if field.hill and field.terrain != "High Mountains" and field.terrain != "Low Mountains":
-            resources.extend(["Copper"]*3 + ["Iron"]*2 + ["Marble"]*1 + ["Stone"]*3
+            resources.extend(["Copper"]*10 + ["Iron"]*5 + ["Marble"]*1 + ["Stone"]*3
                 + ["Gems"]*1 + ["Gold"]*1 + ["Silver"]*1 + ["Wine"]*5 + ["Pasture"]*3)
         r = random.randint(0, 99)
         if r < chance:
@@ -146,8 +149,17 @@ class SimMap(object):
         if field.exact_height > self.hills:
             field.hill = True
         if field.exact_height < self.sealevel:
-            field.terrain = "Ocean"
-            return None
+            landborder = False
+            for n in field.get_dia():
+                if n.exact_height >= self.sealevel:
+                    landborder = True
+                    break
+            if landborder:
+                field.terrain = "Coast"
+                return None
+            else:
+                field.terrain = "Ocean"
+                return None
         elif field.exact_height > self.h_mountains:
             field.terrain = "High Mountains"
             return None

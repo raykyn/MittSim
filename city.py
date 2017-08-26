@@ -31,6 +31,7 @@ class City():
         self.food_tech = 0
         self.prod_tech = 0
         self.money_tech = 0
+        self.chars = [] # Keep a list of all characters that live in this city
             
         
     def detect_resources(self):
@@ -118,11 +119,12 @@ class City():
             self.culture = Culture(self.color)
             new_culture = True
         self.name = self.culture.generate_name(models, "t")
-        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name or ')' in self.name:
+        while len(self.name) < 4 or len(self.name) > 10 or ' ' in self.name or '-' in self.name or ')' in self.name:
             self.name = self.culture.generate_name(models, "t")
         if new_culture:
             self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self, 40)
+        self.chars.append(self.leader)
         for f in self.field.field_neighbor(10):
             if f.city is not None:
                 if f.city.culture == None:
@@ -130,6 +132,8 @@ class City():
                     #~ f.city.change_color(interface)
         if interface.mapmode != "t":
             self.change_color(interface)
+        if interface.mapmode != "t":
+            self.claim_field(self.field, interface)
         for f in self.field.field_neighbor(1):
             if f.owner is not None:
                 if not f.owner.active:
@@ -165,16 +169,25 @@ class City():
     def claim_field(self, field, interface):
         xpos = (field.x*interface.field_size)
         ypos = (field.y*interface.field_size)
-        c = interface.inner_map.find_overlapping(ypos, xpos, ypos+(2*interface.field_size/10), xpos+(2*interface.field_size/10))
+        c = interface.inner_map.find_overlapping(ypos, xpos, ypos+(3*interface.field_size/10), xpos+(3*interface.field_size/10))
         for item in c:
             if interface.inner_map.gettags(item)[0] == "border":
                 d = item
                 break
-        #~ c = interface.inner_map.find_closest(ypos, xpos)
+        if not interface.show_terrain:
+            if interface.mapmode == "p":
+                color = self.color
+            elif interface.mapmode == "c":
+                color = self.culture.color
+            else:
+                color = self.color
+            interface.inner_map.itemconfig(field.graphic, fill=color)
         if interface.mapmode == "p":
             color = self.color
         elif interface.mapmode == "c":
             color = self.culture.color
+        else:
+            color = self.color
         interface.inner_map.itemconfig(d, outline=color)
         interface.inner_map.update_idletasks()
         
@@ -188,11 +201,12 @@ class City():
             self.culture = Culture(self.color)
             new_culture = True
         self.name = self.culture.generate_name(models, "t")
-        while len(self.name) < 6 or len(self.name) > 16 or ' ' in self.name or '-' in self.name or ')' in self.name:
+        while len(self.name) < 6 or len(self.name) > 10 or ' ' in self.name or '-' in self.name or ')' in self.name:
             self.name = self.culture.generate_name(models, "t")
         if new_culture:
             self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self, 40)
+        self.chars.append(self.leader)
         for f in self.field.field_neighbor(10):
             if f.city is not None:
                 if f.city.culture == None:
@@ -214,6 +228,7 @@ class City():
         # get the highest Counter-Entry. 
         # Check if at least two own fields are next to the new one (also diagonally)
         # this shall prevent of just taking all river fields
+        print(field_values)
         for f in field_values:
             field = self.simMap.fieldIDs[f]
             neighboring = 0

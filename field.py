@@ -122,15 +122,16 @@ class Field(object):
     
     def set_values(self):
         terrain_dict = {
-            "Ocean":{"f":2.5,"p":0,"m":1.5},
-            "Grassland":{"f":2,"p":1,"m":1},
-            "Woodland":{"f":1.5,"p":1.5,"m":1},
-            "Low Mountains":{"f":1,"p":2,"m":1},
-            "High Mountains":{"f":0.5,"p":1,"m":0.5},
-            "Wetlands":{"f":3,"p":0,"m":1},
-            "Swamps":{"f":1,"p":0,"m":1},
-            "Steppe":{"f":1.5,"p":1.5,"m":1},
-            "Desert":{"f":0,"p":0.5,"m":0.5}
+            "Coast":{"f":2.5,"p":0,"m":0},
+            "Grassland":{"f":2,"p":1,"m":0},
+            "Woodland":{"f":1.5,"p":1.5,"m":0},
+            "Low Mountains":{"f":1,"p":2,"m":0},
+            "High Mountains":{"f":0.5,"p":0,"m":0},
+            "Wetlands":{"f":3,"p":0,"m":0},
+            "Swamps":{"f":1,"p":0,"m":0},
+            "Steppe":{"f":1.5,"p":1.5,"m":0},
+            "Desert":{"f":0,"p":0.5,"m":0},
+            "Ocean":{"f":1.5,"p":0,"m":0}
         }
         resource_dict = {
             "Fish":{"f":2,"p":0,"m":0},
