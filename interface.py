@@ -22,7 +22,7 @@ class Application():
         self._job = None
         self.counter = 0
         self.speed = 1000
-        self.showing_city = None # The currently shown city
+        self.showing = None # The currently shown city
         # Initialize everything
         self.root = Tk()
         self.screen_width = self.root.winfo_screenwidth()
@@ -171,7 +171,7 @@ class Application():
                 self.city_info.pack(fill="x", expand=1, padx=10, ipady=5)
                 self._city_name.set(f.owner.name)
                 #~ if f.owner.leader is not None:
-                self.city_info_values["Leader:"].set(f.owner.leader.firstname)
+                self.city_info_values["Leader:"].set(f.owner.leader.fullname)
                 #~ else:
                     #~ self.city_info_values["Leader:"].set(None)
                 self.city_info_values["Population:"].set(round(f.owner.pop))
@@ -182,10 +182,10 @@ class Application():
                 self.city_info_values["Wealth:"].set(round(f.owner.wealth, 2))
                 self.city_info_values["WpC:"].set(round(f.owner.wpc, 2))
                 self.city_info_values["Resources:"].set(', '.join(f.owner.resources))
-                #~ self.char_info.pack_forget()
-                #~ self.showing = f.owner
-                #~ self.city_info.pack(fill="both")
-                #~ self.emp_info.pack(fill="both")
+                self.char_info.pack_forget()
+                self.showing = f.owner
+                self.city_info.pack(fill="both")
+                self.emp_info.pack(fill="both")
             else:
                 #~ self._city_name.set("")
                 #~ for l in self.city_info_values:
@@ -329,28 +329,58 @@ class Application():
         for n, label in enumerate(city_info_list):
             self.city_info_values[label] = StringVar(self.city_info, "")
             Label(self.city_info, text=label).grid(row=n+1, column=0, sticky=N+W, padx=10)
-            Message(self.city_info, textvariable=self.city_info_values[label], width=160).grid(row=n+1, column=1, sticky=N+W)
-        #~ Button(self.city_info, text="More", command=self._show_char_info).grid(row=1, column=2)
+            m = Message(self.city_info, textvariable=self.city_info_values[label], width=160)
+            m.grid(row=n+1, column=1, sticky=N+W)
+            if label == "Leader:":
+                m.bind("<Button-3>", self._show_char_info)
         
-    def _show_char_info(self):
-        self.city_info.pack_forget()
-        self.emp_info.pack_forget()
-        try:
-            self.char_name.set(self.showing.leader.fullname)
-            self.char_age.set(self.showing.leader.age)
-        except:
-            self.char_name.set("No Leader")
-            self.char_age.set("")
-        self.char_info.pack(fill="both")
+    def _show_char_info(self, event):
+        character = self.showing.leader
+        self.char_name.set(character.fullname)
+        self.char_age.set(character.age)
+        print(character.age)
+        self.curr_char_attr_values["Diplomacy:"].set(character.skills["Diplomacy"])
+        self.curr_char_attr_values["Military:"].set(character.skills["Military"])
+        self.curr_char_attr_values["Commerce:"].set(character.skills["Commerce"])
+        self.curr_char_attr_values["Intrigue:"].set(character.skills["Intrigue"])
+        self.curr_char_attr_values["Scholarship:"].set(character.skills["Scholarship"])
+        self.curr_char_competence.set(character.competence)
+        self.curr_char_focus.set(", ".join(character.focus))
+        print(character.focus)
+        print(character.competence)
+        self.char_info.pack(fill="x", expand=1, padx=10, ipady=5)
     
     def _char_info(self, desc):
-        self.char_info = Frame(desc, relief=RIDGE)
+        self.char_info = LabelFrame(desc, text="CHARACTER INFO")
         self.char_name = StringVar(self.char_info, "")
-        Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=W+E, columnspan=2)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=N+W, columnspan=2, padx=10)
         self.char_age = IntVar(self.char_info, 0)
-        Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=W+E)
-        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=200).grid(row=1, column=1, sticky=W+E)
-        
+        Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=200).grid(row=1, column=1, sticky=N+W)
+        Separator(self.char_info, orient=HORIZONTAL).grid(row=2, columnspan=2, sticky=W+E)
+        attr_list = [
+            "Diplomacy:",
+            "Military:",
+            "Commerce:",
+            "Intrigue:",
+            "Scholarship:"
+        ]
+        self.curr_char_attr_values = {}
+        for n, label in enumerate(attr_list):
+            self.curr_char_attr_values[label] = StringVar(self.char_info, "")
+            Label(self.char_info, text=label).grid(row=n+3, column=0, sticky=N+W, padx=10)
+            m = Message(self.char_info, textvariable=self.curr_char_attr_values[label], width=160)
+            m.grid(row=n+3, column=1, sticky=N+W)
+            last = n+3
+        self.curr_char_competence = StringVar(self.char_info, "")
+        Separator(self.char_info, orient=HORIZONTAL).grid(row=last+1, columnspan=2, sticky=W+E)
+        Label(self.char_info, justify=LEFT, text="Competence:").grid(row=last+2, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_competence, width=200).grid(row=last+2, column=1, sticky=N+W)
+        self.curr_char_focus = StringVar(self.char_info, "")
+        Label(self.char_info, justify=LEFT, text="Focus:").grid(row=last+3, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_focus, width=200).grid(row=last+3, column=1, sticky=N+W)
+            
+            
         
     def _emp_info(self, desc):
         self.emp_info = Frame(desc)

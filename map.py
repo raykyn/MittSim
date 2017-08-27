@@ -96,7 +96,7 @@ class SimMap(object):
                 self._createCity(field)
                 city = field.city
                 #~ print("City created", city)
-                if start < 150:
+                if start < 160:
                     self.cities.append(city)
                     #~ print("City appended active!", city)
                 else:
@@ -106,7 +106,10 @@ class SimMap(object):
                 #~ print("Not clear!")
                     
         # Now loop through the cities and make them active
-        for c in self.cities:
+        print(len(self.cities))
+        for n, c in enumerate(self.cities):
+            if n % 25 == 0:
+                print("Created {} cities".format(n))
             c.make_first_city(self.culture_models)
                 
         
@@ -346,11 +349,11 @@ class SimMap(object):
         
         for row in self.fields:
             for m in range(distance):
-                col = row[n]
+                col = row[m]
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
-                col = row[-n+1]
+                col = row[-m+1]
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
@@ -409,7 +412,7 @@ class SimMap(object):
                     
         
 def main():
-    newmap = SimMap(180,90)
+    newmap = SimMap(90,45) # 180 / 90 Standard
     newmap.fillfield()
     newmap.create_tkinter()
 

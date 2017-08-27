@@ -4,6 +4,7 @@ import random
 from culture import Culture
 from characters import Character
 from collections import Counter
+from title import Title
 
 class City():
     def __init__(self, simMap, field, x, y):
@@ -26,6 +27,7 @@ class City():
         self.wpc = 0
         self.growth = 0.0
         self.leader = None
+        self.title = None
         self.territory = [field] # Keeps all fields that are owned by this city
         self.chars = [] # Keep a list of all characters that live in this city
         
@@ -154,6 +156,10 @@ class City():
         if new_culture:
             self.culture.name = self.name + "ian"
         self.leader = Character(models, self.culture, self, 40)
+        ### CREATE TITLE
+        self.title = Title(self.name, None, [], [self], 1)
+        self.leader.titles.append(self.title)
+        self.leader.refresh_fullname()
         self.chars.append(self.leader)
         for f in self.field.field_neighbor(10):
             if f.city is not None:
