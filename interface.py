@@ -25,10 +25,14 @@ class Application():
         self.showing = None # The currently shown city
         # Initialize everything
         self.root = Tk()
+        style = Style()
+        style.configure("TFrame", background="burlywood")
+        style.configure(".", background="burlywood")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
         self.root.geometry(str(self.screen_width) + "x" + str(self.screen_height))
         self.root.title("MyLittleFantasySimulator")
+        self.root.configure(background="burlywood")
         self._create_menu()
         self._create_game_map_frame()
         self._create_scrollbars()
@@ -233,12 +237,6 @@ class Application():
         self.inner_map.grid(row=0, column=0)
         #~ self.inner_map.create_window((8,8), window=self.game_map, anchor="nw")
         self.inner_map.bind("<Configure>", lambda event, canvas=self.inner_map: self._onFrameConfigure(canvas))
-        #~ self.inner_map.bind("<Button-1>", self._get_field)
-        #~ self.inner_map.bind("<Button-1>", self._scroll_start)
-        #~ self.inner_map.bind("<B1-Motion>", self._scroll_move)
-        #~ self.inner_map.bind("<Button-4>", self.zoomerP)
-        #~ self.inner_map.bind("<Button-5>", self.zoomerM)
-        #~ self.inner_map.bind("<MouseWheel>",self.zoomer)
         
     #windows zoom
     def zoomer(self,event):
@@ -286,7 +284,7 @@ class Application():
         
     def _create_description_frame(self):
         desc = Frame(self.root)
-        desc.grid(row=0, column=2, sticky=N+W+E, ipady=10)
+        desc.grid(row=0, column=2, sticky=N+W+E+S, ipady=10)
         # 3 frames packed below that:
         # Field-Info, City-Info, Empire-Info
         self._field_info(desc)
@@ -338,7 +336,6 @@ class Application():
         character = self.showing.leader
         self.char_name.set(character.fullname)
         self.char_age.set(character.age)
-        print(character.age)
         self.curr_char_attr_values["Diplomacy:"].set(character.skills["Diplomacy"])
         self.curr_char_attr_values["Military:"].set(character.skills["Military"])
         self.curr_char_attr_values["Commerce:"].set(character.skills["Commerce"])
@@ -346,8 +343,6 @@ class Application():
         self.curr_char_attr_values["Scholarship:"].set(character.skills["Scholarship"])
         self.curr_char_competence.set(character.competence)
         self.curr_char_focus.set(", ".join(character.focus))
-        print(character.focus)
-        print(character.competence)
         self.char_info.pack(fill="x", expand=1, padx=10, ipady=5)
     
     def _char_info(self, desc):
@@ -356,7 +351,7 @@ class Application():
         Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=N+W, columnspan=2, padx=10)
         self.char_age = IntVar(self.char_info, 0)
         Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=N+W, padx=10)
-        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=200).grid(row=1, column=1, sticky=N+W)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=160).grid(row=1, column=1, sticky=N+W)
         Separator(self.char_info, orient=HORIZONTAL).grid(row=2, columnspan=2, sticky=W+E)
         attr_list = [
             "Diplomacy:",
@@ -375,10 +370,10 @@ class Application():
         self.curr_char_competence = StringVar(self.char_info, "")
         Separator(self.char_info, orient=HORIZONTAL).grid(row=last+1, columnspan=2, sticky=W+E)
         Label(self.char_info, justify=LEFT, text="Competence:").grid(row=last+2, column=0, sticky=N+W, padx=10)
-        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_competence, width=200).grid(row=last+2, column=1, sticky=N+W)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_competence, width=160).grid(row=last+2, column=1, sticky=N+W)
         self.curr_char_focus = StringVar(self.char_info, "")
         Label(self.char_info, justify=LEFT, text="Focus:").grid(row=last+3, column=0, sticky=N+W, padx=10)
-        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_focus, width=200).grid(row=last+3, column=1, sticky=N+W)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_focus, width=160).grid(row=last+3, column=1, sticky=N+W)
             
             
         
@@ -388,14 +383,14 @@ class Application():
         
     def _create_news_frame(self):
         news_frame = Frame(self.root)
-        news_frame.grid(row=2, column=0)
+        news_frame.grid(row=2, column=0, sticky=N+W+E+S)
         self._news = StringVar(news_frame, "No news yet")
         l = Label(news_frame, textvariable=self._news)
         l.grid(row=0, column=0)
         
     def _create_date_frame(self):
         date_frame = Frame(self.root)
-        date_frame.grid(row=2, column=2)
+        date_frame.grid(row=2, column=2, sticky=N+W+E+S)
         self.date = Label(date_frame)
         self.date.grid(sticky=W+E, columnspan=4)
         speeds = [(100, "FAST"), (1000, "NORMAL"), (3000, "SLOW")]

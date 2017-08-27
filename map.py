@@ -28,7 +28,7 @@ class SimMap(object):
         self.culture_models = start_Cultures()
         self.culture_models.load_all()
         self.game_map = None
-        self.city_stage1 = 150
+        self.max_ticks = 160 # would be 25 wealth
             
             
     def fillfield(self):
@@ -96,7 +96,7 @@ class SimMap(object):
                 self._createCity(field)
                 city = field.city
                 #~ print("City created", city)
-                if start < 160:
+                if start < self.max_ticks:
                     self.cities.append(city)
                     #~ print("City appended active!", city)
                 else:
@@ -237,8 +237,8 @@ class SimMap(object):
     
             
     def _create_rivers(self):
-        num_of_rivers = round((self.width*self.height)/150)
-        #num_of_rivers = 80
+        #~ num_of_rivers = round((self.width*self.height)/150)
+        num_of_rivers = round(len(self.mountain_fields)/20)
         for i in range(num_of_rivers):
             success = False
             while not success:

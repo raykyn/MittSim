@@ -158,6 +158,7 @@ class City():
         self.leader = Character(models, self.culture, self, 40)
         ### CREATE TITLE
         self.title = Title(self.name, None, [], [self], 1)
+        self.title.setGovFormGameStart(self.leader.focus)
         self.leader.titles.append(self.title)
         self.leader.refresh_fullname()
         self.chars.append(self.leader)

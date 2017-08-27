@@ -18,9 +18,9 @@ def run(tick, game, interface):
             c.detect_resources()
             c.calculate_values()
             c.calculate_growth()
-            grow(c, game.culture_models, interface, game.city_stage1)
+            grow(c, game.culture_models, interface)
             
             
                 
-def grow(c, models, interface, city_base_pop):
+def grow(c, models, interface):
     c.pop = c.pop + (c.pop*c.growth)
