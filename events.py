@@ -16,18 +16,11 @@ def run(tick, game, interface):
         if int(str(c.seed)[-1]) == tick:
             # Only triggers all 10 seconds
             c.detect_resources()
-            c.calculate_tech()
             c.calculate_values()
             c.calculate_growth()
-            grow(c, game.culture_models, interface, game.city_stage1)
+            grow(c, game.culture_models, interface)
             
             
                 
-def grow(c, models, interface, city_base_pop):
+def grow(c, models, interface):
     c.pop = c.pop + (c.pop*c.growth)
-    if c.pop >= city_base_pop and not c.active and c.field.owner == c:
-        c.make_city(models, interface)
-        interface._alert_new_city(c)
-    # If city reaches next food limit, claim an unclaimed field
-    if c.pop >= c.food_limit and c.active and len(c.territory) < 61:
-        c.grow_territory(interface)

@@ -22,13 +22,17 @@ class Application():
         self._job = None
         self.counter = 0
         self.speed = 1000
-        self.showing_city = None # The currently shown city
+        self.showing = None # The currently shown city
         # Initialize everything
         self.root = Tk()
+        style = Style()
+        style.configure("TFrame", background="burlywood")
+        style.configure(".", background="burlywood")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
         self.root.geometry(str(self.screen_width) + "x" + str(self.screen_height))
         self.root.title("MyLittleFantasySimulator")
+        self.root.configure(background="burlywood")
         self._create_menu()
         self._create_game_map_frame()
         self._create_scrollbars()
@@ -74,9 +78,9 @@ class Application():
                     terrain_color = terrain_colors[f.terrain]
                     river_color = "blue"
                 else:
-                    if f.terrain != "Ocean" and (f.owner is None or not f.owner.active):
+                    if f.terrain not in ["Ocean", "Coast"] and (f.owner is None or not f.owner.active):
                         terrain_color = "white"
-                    elif f.terrain == "Ocean":
+                    elif f.terrain in ["Ocean", "Coast"]:
                         terrain_color = "navy"
                     else:
                         if self.mapmode == "p":
@@ -108,6 +112,17 @@ class Application():
                                 else:
                                     citycolor = "white"
                             self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag=("city", f.fieldID))
+                        else:
+                            #~ print("inactive city created!")
+                            if self.mapmode == "p": # political
+                                citycolor = "purple"
+                            elif self.mapmode == "c": # cultural
+                                if f.owner.culture is not None:
+                                    citycolor = f.owner.culture.color
+                                else:
+                                    citycolor = "purple"
+                            self.inner_map.create_rectangle((x*size)+(size/4), (y*size)+(size/4), ((x+1)*size)-(size/4), (y+1)*size-size/4, fill=citycolor, tag=("city", f.fieldID))
+                    
                     if f.owner is not None:
                         if f.owner.active:
                             if self.mapmode == "p": # political
@@ -145,9 +160,7 @@ class Application():
             #~ self.field_info_values["POPULATION:"].set(str(round(f.city.pop)))
         #~ else:
             #~ self.field_info_values["POPULATION:"].set(str(0))
-        self.field_info_values["FOOD:"].set(str(f.food))
-        self.field_info_values["PRODUCTION:"].set(str(f.production))
-        self.field_info_values["MONEY:"].set(str(f.money))
+        self.field_info_values["WEALTH:"].set(str(f.wealth))
         other = []
         if f.hill:
             other.append("Hill")
@@ -162,7 +175,7 @@ class Application():
                 self.city_info.pack(fill="x", expand=1, padx=10, ipady=5)
                 self._city_name.set(f.owner.name)
                 #~ if f.owner.leader is not None:
-                self.city_info_values["Leader:"].set(f.owner.leader.firstname)
+                self.city_info_values["Leader:"].set(f.owner.leader.fullname)
                 #~ else:
                     #~ self.city_info_values["Leader:"].set(None)
                 self.city_info_values["Population:"].set(round(f.owner.pop))
@@ -170,14 +183,13 @@ class Application():
                 self.city_info_values["Culture:"].set(f.owner.culture.name)
                 #~ else:
                     #~ self.city_info_values["Culture:"].set(None)
-                self.city_info_values["Food:"].set(round(f.owner.values["f"],2))
-                self.city_info_values["Production:"].set(round(f.owner.values["p"],2))
-                self.city_info_values["Money:"].set(round(f.owner.values["m"],2))
+                self.city_info_values["Wealth:"].set(round(f.owner.wealth, 2))
+                self.city_info_values["WpC:"].set(round(f.owner.wpc, 2))
                 self.city_info_values["Resources:"].set(', '.join(f.owner.resources))
-                #~ self.char_info.pack_forget()
-                #~ self.showing = f.owner
-                #~ self.city_info.pack(fill="both")
-                #~ self.emp_info.pack(fill="both")
+                self.char_info.pack_forget()
+                self.showing = f.owner
+                self.city_info.pack(fill="both")
+                self.emp_info.pack(fill="both")
             else:
                 #~ self._city_name.set("")
                 #~ for l in self.city_info_values:
@@ -225,12 +237,6 @@ class Application():
         self.inner_map.grid(row=0, column=0)
         #~ self.inner_map.create_window((8,8), window=self.game_map, anchor="nw")
         self.inner_map.bind("<Configure>", lambda event, canvas=self.inner_map: self._onFrameConfigure(canvas))
-        #~ self.inner_map.bind("<Button-1>", self._get_field)
-        #~ self.inner_map.bind("<Button-1>", self._scroll_start)
-        #~ self.inner_map.bind("<B1-Motion>", self._scroll_move)
-        #~ self.inner_map.bind("<Button-4>", self.zoomerP)
-        #~ self.inner_map.bind("<Button-5>", self.zoomerM)
-        #~ self.inner_map.bind("<MouseWheel>",self.zoomer)
         
     #windows zoom
     def zoomer(self,event):
@@ -278,7 +284,7 @@ class Application():
         
     def _create_description_frame(self):
         desc = Frame(self.root)
-        desc.grid(row=0, column=2, sticky=N+W+E, ipady=10)
+        desc.grid(row=0, column=2, sticky=N+W+E+S, ipady=10)
         # 3 frames packed below that:
         # Field-Info, City-Info, Empire-Info
         self._field_info(desc)
@@ -295,9 +301,7 @@ class Application():
             "RESSOURCE:",
             "OTHER:",
             #~ "POPULATION:",
-            "FOOD:",
-            "PRODUCTION:",
-            "MONEY:"
+            "WEALTH:",
         ]
         self.field_info_values = {}
         for n, label in enumerate(field_info_list):
@@ -315,37 +319,63 @@ class Application():
             "Leader:",
             "Population:",
             "Culture:",
-            "Food:",
-            "Production:",
-            "Money:",
+            "Wealth:",
+            "WpC:",
             "Resources:"
         ]
         self.city_info_values = {}
         for n, label in enumerate(city_info_list):
             self.city_info_values[label] = StringVar(self.city_info, "")
             Label(self.city_info, text=label).grid(row=n+1, column=0, sticky=N+W, padx=10)
-            Message(self.city_info, textvariable=self.city_info_values[label], width=160).grid(row=n+1, column=1, sticky=N+W)
-        #~ Button(self.city_info, text="More", command=self._show_char_info).grid(row=1, column=2)
+            m = Message(self.city_info, textvariable=self.city_info_values[label], width=160)
+            m.grid(row=n+1, column=1, sticky=N+W)
+            if label == "Leader:":
+                m.bind("<Button-3>", self._show_char_info)
         
-    def _show_char_info(self):
-        self.city_info.pack_forget()
-        self.emp_info.pack_forget()
-        try:
-            self.char_name.set(self.showing.leader.fullname)
-            self.char_age.set(self.showing.leader.age)
-        except:
-            self.char_name.set("No Leader")
-            self.char_age.set("")
-        self.char_info.pack(fill="both")
+    def _show_char_info(self, event):
+        character = self.showing.leader
+        self.char_name.set(character.fullname)
+        self.char_age.set(character.age)
+        self.curr_char_attr_values["Diplomacy:"].set(character.skills["Diplomacy"])
+        self.curr_char_attr_values["Military:"].set(character.skills["Military"])
+        self.curr_char_attr_values["Commerce:"].set(character.skills["Commerce"])
+        self.curr_char_attr_values["Intrigue:"].set(character.skills["Intrigue"])
+        self.curr_char_attr_values["Scholarship:"].set(character.skills["Scholarship"])
+        self.curr_char_competence.set(character.competence)
+        self.curr_char_focus.set(", ".join(character.focus))
+        self.char_info.pack(fill="x", expand=1, padx=10, ipady=5)
     
     def _char_info(self, desc):
-        self.char_info = Frame(desc, relief=RIDGE)
+        self.char_info = LabelFrame(desc, text="CHARACTER INFO")
         self.char_name = StringVar(self.char_info, "")
-        Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=W+E, columnspan=2)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_name, width=200, font="Verdana 10 bold").grid(row=0, column=0, sticky=N+W, columnspan=2, padx=10)
         self.char_age = IntVar(self.char_info, 0)
-        Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=W+E)
-        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=200).grid(row=1, column=1, sticky=W+E)
-        
+        Label(self.char_info, justify=LEFT, text="Age:").grid(row=1, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.char_age, width=160).grid(row=1, column=1, sticky=N+W)
+        Separator(self.char_info, orient=HORIZONTAL).grid(row=2, columnspan=2, sticky=W+E)
+        attr_list = [
+            "Diplomacy:",
+            "Military:",
+            "Commerce:",
+            "Intrigue:",
+            "Scholarship:"
+        ]
+        self.curr_char_attr_values = {}
+        for n, label in enumerate(attr_list):
+            self.curr_char_attr_values[label] = StringVar(self.char_info, "")
+            Label(self.char_info, text=label).grid(row=n+3, column=0, sticky=N+W, padx=10)
+            m = Message(self.char_info, textvariable=self.curr_char_attr_values[label], width=160)
+            m.grid(row=n+3, column=1, sticky=N+W)
+            last = n+3
+        self.curr_char_competence = StringVar(self.char_info, "")
+        Separator(self.char_info, orient=HORIZONTAL).grid(row=last+1, columnspan=2, sticky=W+E)
+        Label(self.char_info, justify=LEFT, text="Competence:").grid(row=last+2, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_competence, width=160).grid(row=last+2, column=1, sticky=N+W)
+        self.curr_char_focus = StringVar(self.char_info, "")
+        Label(self.char_info, justify=LEFT, text="Focus:").grid(row=last+3, column=0, sticky=N+W, padx=10)
+        Message(self.char_info, justify=LEFT, textvariable=self.curr_char_focus, width=160).grid(row=last+3, column=1, sticky=N+W)
+            
+            
         
     def _emp_info(self, desc):
         self.emp_info = Frame(desc)
@@ -353,14 +383,14 @@ class Application():
         
     def _create_news_frame(self):
         news_frame = Frame(self.root)
-        news_frame.grid(row=2, column=0)
+        news_frame.grid(row=2, column=0, sticky=N+W+E+S)
         self._news = StringVar(news_frame, "No news yet")
         l = Label(news_frame, textvariable=self._news)
         l.grid(row=0, column=0)
         
     def _create_date_frame(self):
         date_frame = Frame(self.root)
-        date_frame.grid(row=2, column=2)
+        date_frame.grid(row=2, column=2, sticky=N+W+E+S)
         self.date = Label(date_frame)
         self.date.grid(sticky=W+E, columnspan=4)
         speeds = [(100, "FAST"), (1000, "NORMAL"), (3000, "SLOW")]

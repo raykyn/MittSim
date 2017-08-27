@@ -21,33 +21,31 @@ class StartUp():
         Frame(self.root, height=2, bd=1, relief=SUNKEN).grid(columnspan=2, sticky=W+E)
         # region size (low value more fractured, high value less)
         Label(self.root, text="Region Size", justify=LEFT).grid(row=3, column=0, sticky=W+E)
-        self.reach = IntVar(self.root, 8)
+        self.reach = IntVar(self.root, 15)
         Entry(self.root, textvariable=self.reach, justify=LEFT).grid(row=3, column=1, sticky=W+E)
         # border fracture (low value low fracture, high value more)
         Label(self.root, text="Border Fracture", justify=LEFT).grid(row=4, column=0, sticky=W+E)
-        self.terrain_change = DoubleVar(self.root, 0.2)
+        self.terrain_change = DoubleVar(self.root, 6)
         Entry(self.root, textvariable=self.terrain_change, justify=LEFT).grid(row=4, column=1, sticky=W+E)
         # separator
         Frame(self.root, height=2, bd=1, relief=SUNKEN).grid(columnspan=2, sticky=W+E)
         # Terrain chances
         self.terrain_types = [
-            ("Ocean", IntVar(self.root,1)),
-            ("Coastal", IntVar(self.root,3)),
-            ("Lowlands", IntVar(self.root,4)),
-            ("Woodlands", IntVar(self.root,4)),
-            ("Highlands", IntVar(self.root,3)),
-            ("Lower Mountains", IntVar(self.root,2)),
-            ("High Mountains", IntVar(self.root,1))
+            ("Sealevel", IntVar(self.root, 75)),
+            ("Midlands", IntVar(self.root, 120)),
+            ("Hills", IntVar(self.root, 150)),
+            ("Low Mountains", IntVar(self.root, 170)),
+            ("High Mountains", IntVar(self.root, 190))
         ]
-        Label(self.root, text="Terrain Generation Chances:").grid(columnspan=2, sticky=W+E)
+        Label(self.root, text="Height levels:").grid(columnspan=2, sticky=W+E)
         for n, t in enumerate(self.terrain_types):
             Label(self.root, text=t[0], justify=LEFT).grid(row=n+7, column=0, sticky=W+E)
             Entry(self.root, textvariable=t[1], justify=LEFT).grid(row=n+7, column=1, sticky=W+E)
         # separator
         Frame(self.root, height=2, bd=1, relief=SUNKEN).grid(columnspan=2, sticky=W+E)
         # city generation chance
-        self.city_gen = DoubleVar(self.root, 0.15)
-        Label(self.root, text="CityGen rate", justify=LEFT).grid(column=0, sticky=W+E)
+        self.city_gen = DoubleVar(self.root, 25)
+        Label(self.root, text="Min Wealth To Activate Cities", justify=LEFT).grid(column=0, columnspan=2, sticky=W+E)
         Entry(self.root, textvariable=self.city_gen, justify=LEFT).grid(row=15, column=1, sticky=W+E)
         # separator
         Frame(self.root, height=2, bd=1, relief=SUNKEN).grid(columnspan=2, sticky=W+E)
@@ -60,14 +58,15 @@ class StartUp():
         newmap = SimMap(self.map_width.get(), self.map_height.get())
         newmap.reach_limit = self.reach.get()
         newmap.terrain_change_rate = self.terrain_change.get()
-        newmap.ocean_chance = self.terrain_types[0][1].get()
-        newmap.coastal_chance = self.terrain_types[1][1].get()
-        newmap.lowlands_chance = self.terrain_types[2][1].get()
-        newmap.woodlands_chance = self.terrain_types[3][1].get()
-        newmap.highlands_chance = self.terrain_types[4][1].get()
-        newmap.lower_m_chance = self.terrain_types[5][1].get()
-        newmap.higher_m_chance = self.terrain_types[6][1].get()
-        newmap.city_generation_chance = self.city_gen.get()
+
+        newmap.sealevel = self.terrain_types[0][1].get()
+        newmap.midslands = self.terrain_types[1][1].get()
+        newmap.hills = self.terrain_types[2][1].get()
+        newmap.l_mountains = self.terrain_types[3][1].get()
+        newmap.h_mountains = self.terrain_types[4][1].get()
+        
+        newmap.max_ticks = int(4000/self.city_gen.get())
+
         newmap.fillfield()
         self.root.destroy()
         newmap.create_tkinter()

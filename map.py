@@ -23,11 +23,12 @@ class SimMap(object):
         self.midlands = 120
         self.fields = [["O" for x in range(self.width)] for y in range(self.height)] 
         self.cities = []
+        self.inactive_cities = []
         # generate culture data
         self.culture_models = start_Cultures()
         self.culture_models.load_all()
         self.game_map = None
-        self.city_stage1 = 150
+        self.max_ticks = 160 # would be 25 wealth
             
             
     def fillfield(self):
@@ -59,28 +60,58 @@ class SimMap(object):
                 self._set_terrain(self.fieldIDs[fieldID])
                 self._createResources(self.fieldIDs[fieldID])
                 self.fieldIDs[fieldID].set_values()
-                if self.fieldIDs[fieldID].exact_height >= self.sealevel and self.fieldIDs[fieldID].terrain != "High Mountains" and not self.fieldIDs[fieldID].lake:
-                    self._createCity(self.fieldIDs[fieldID])
-        for c in self.cities:
-            c.detect_resources()
-            c.calculate_tech()
-            c.calculate_values()
-            c.calculate_growth()
-        #~ # Grow cities as long until a first city exists, then start game
-        a_city = False
-        tick = 0
-        while not a_city:
-            tick += 1
-            for c in self.cities:
-                c.calculate_growth()
-                c.pop = c.pop + (c.pop*c.growth)
-                if c.pop >= self.city_stage1 and not c.active and c.field.owner == c:
-                    print("REACHED")
-                    c.make_first_city(self.culture_models)
-                    print(c.name)
-                    print(c.growth)
-                    a_city = True
-                    print(tick)
+                
+        # create potential cities
+        starting_tick_dict = Counter()
+        # loop through all fields
+        for fieldID in shuffled_IDs:
+            field = self.fieldIDs[fieldID]
+            # only fields that are not oceans neither high mountains
+            if field.terrain not in ["Ocean", "Coast", "High Mountains"]:
+                # calc wealth of this field + all the other fields around/2
+                fields = field.field_neighbor(1)
+                fields.append(field) # append itself a second time so it counts double
+                sum_wealth = 0
+                for f in fields:
+                    sum_wealth += f.wealth
+                # based on that, calc a starting tick value
+                # Really good city: e.g. 28
+                # Really bad city: e.g. 5
+                # Let's take 40 as best
+                # And 6 as worst
+                if sum_wealth > 20:
+                    starting_tick_dict[field] = int(4000/sum_wealth)
+        
+        for field, start in reversed(starting_tick_dict.most_common()):
+            #~ print("Working field", field, start)
+            # check that no neighboring field has already a city
+            nei = field.get_dia()
+            nei_c = False
+            for f in nei:
+                if f.city is not None:
+                    nei_c = True
+                    break
+            if not nei_c:
+                #~ print("Clear!")
+                self._createCity(field)
+                city = field.city
+                #~ print("City created", city)
+                if start < self.max_ticks:
+                    self.cities.append(city)
+                    #~ print("City appended active!", city)
+                else:
+                    self.inactive_cities.append(city)
+                    #~ print("City appended inactive!", city)
+            #~ else:
+                #~ print("Not clear!")
+                    
+        # Now loop through the cities and make them active
+        print(len(self.cities))
+        for n, c in enumerate(self.cities):
+            if n % 25 == 0:
+                print("Created {} cities".format(n))
+            c.make_first_city(self.culture_models)
+                
         
     def _createResources(self, field):
         """
@@ -206,8 +237,8 @@ class SimMap(object):
     
             
     def _create_rivers(self):
-        num_of_rivers = round((self.width*self.height)/150)
-        #num_of_rivers = 80
+        #~ num_of_rivers = round((self.width*self.height)/150)
+        num_of_rivers = round(len(self.mountain_fields)/20)
         for i in range(num_of_rivers):
             success = False
             while not success:
@@ -318,11 +349,11 @@ class SimMap(object):
         
         for row in self.fields:
             for m in range(distance):
-                col = row[n]
+                col = row[m]
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
-                col = row[-n+1]
+                col = row[-m+1]
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
@@ -381,7 +412,7 @@ class SimMap(object):
                     
         
 def main():
-    newmap = SimMap(180,90)
+    newmap = SimMap(90,45) # 180 / 90 Standard
     newmap.fillfield()
     newmap.create_tkinter()
 
