@@ -334,14 +334,14 @@ class SimMap(object):
     def _create_ocean(self):
         self.ocean_fields = []
         
-        distance = round(self.width/60)
+        distance = round(self.width/60)+1
         for n in range(distance):
             to_oceanize = self.fields[n]
             for col in to_oceanize:
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
-            to_oceanize = self.fields[-n+1]
+            to_oceanize = self.fields[-n]
             for col in to_oceanize:
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
@@ -353,7 +353,7 @@ class SimMap(object):
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
-                col = row[-m+1]
+                col = row[-m]
                 col.height = random.randint(0, 49)
                 col.exact_height = random.randint(0, 49)
                 self.ocean_fields.append(col)
